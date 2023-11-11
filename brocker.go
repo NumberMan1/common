@@ -46,7 +46,6 @@ func (b *BaseComponent) dealOp(operation Operation) {
 	}
 	if !operation.IsAsynchronous {
 		fn()
-
 	} else {
 		go func() {
 			fn()

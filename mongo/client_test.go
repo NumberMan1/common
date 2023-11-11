@@ -1,9 +1,9 @@
 package mongobrocker
 
 import (
+	"Common"
 	"context"
 	"fmt"
-	"github.com/phuhao00/broker"
 	"testing"
 	"time"
 
@@ -26,7 +26,7 @@ func TestClient(t *testing.T) {
 	ctx := context.Background()
 	to := &testOwner{}
 	tc := &Client{
-		BaseComponent: broker.NewBaseComponent(),
+		BaseComponent: common.NewBaseComponent(),
 		RealCli: NewClient(ctx, &Config{
 			URI:         "mongodb://localhost:27017",
 			MinPoolSize: 3,
@@ -46,7 +46,7 @@ func TestClient(t *testing.T) {
 		id := res.InsertedID
 		fmt.Println(id)
 	}
-	op := broker.Operation{
+	op := common.Operation{
 		CB:  fn,
 		Ret: make(chan interface{}),
 	}

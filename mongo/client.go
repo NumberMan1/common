@@ -1,20 +1,20 @@
 package mongobrocker
 
 import (
+	common "Common"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
 	"io/ioutil"
 
-	"github.com/phuhao00/broker"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type Client struct {
-	*broker.BaseComponent
+	*common.BaseComponent
 	RealCli *mongo.Client
 }
 

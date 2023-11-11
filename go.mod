@@ -5,7 +5,6 @@ go 1.21
 require (
 	github.com/json-iterator/go v1.1.12
 	github.com/nsqio/go-nsq v1.1.0
-	github.com/phuhao00/broker v1.0.6
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.3.0
 	go.mongodb.org/mongo-driver v1.13.0

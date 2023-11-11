@@ -15,7 +15,6 @@ func NewClusterClient(conf *Config) *ClusterClient {
 		BaseComponent: common.NewBaseComponent(),
 		ClusterClient: redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: conf.Addrs,
-
 			//Addrs: []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
 			// To route commands by latency or randomly, enable one of the following.
 			//RouteByLatency: true,
