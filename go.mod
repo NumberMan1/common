@@ -1,6 +1,6 @@
 module github.com/NumberMan1/common
 
-go 1.21
+go 1.21.1
 
 require (
 	github.com/json-iterator/go v1.1.12
