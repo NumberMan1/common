@@ -2,8 +2,8 @@ package example
 
 import (
 	"fmt"
+	"github.com/NumberMan1/common/nsq"
 	gnsq "github.com/nsqio/go-nsq"
-	"github.com/phuhao00/broker/nsq"
 	"testing"
 )
 

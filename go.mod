@@ -1,4 +1,4 @@
-module Common
+module github.com/NumberMan1/common
 
 go 1.21
 

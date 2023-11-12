@@ -1,12 +1,12 @@
 package mongobrocker
 
 import (
-	common "Common"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"io/ioutil"
+	"github.com/NumberMan1/common"
+	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -35,8 +35,8 @@ func NewClient(ctx context.Context, config *Config) *mongo.Client {
 func NewClientWithTLS() (*mongo.Client, error) {
 	uri := "mongodb://user:password@localhost/?replicaSet=replset&authSource=admin"
 	opts := options.Client().ApplyURI(uri)
-	caBytes, _ := ioutil.ReadFile("/etc/ssl/certs/ca.pem")
-	clientBytes, _ := ioutil.ReadFile("/etc/ssl/certs/client.pem")
+	caBytes, _ := os.ReadFile("/etc/ssl/certs/ca.pem")
+	clientBytes, _ := os.ReadFile("/etc/ssl/certs/client.pem")
 	roots := x509.NewCertPool()
 	if ok := roots.AppendCertsFromPEM(caBytes); !ok {
 		return nil, errors.New("failed to parse root certificate")

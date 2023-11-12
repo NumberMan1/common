@@ -1,7 +1,7 @@
 package redis
 
 import (
-	common "Common"
+	"github.com/NumberMan1/common"
 	"github.com/redis/go-redis/v9"
 )
 
