@@ -28,7 +28,7 @@ func TestClient(t *testing.T) {
 	tc := &Client{
 		BaseComponent: common.NewBaseComponent(),
 		RealCli: NewClient(ctx, &Config{
-			URI:         "mongodb://localhost:27017",
+			URI:         "mongodb://localhost:27016",
 			MinPoolSize: 3,
 			MaxPoolSize: 3000,
 		}),

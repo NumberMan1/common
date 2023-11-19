@@ -10,6 +10,20 @@ type ClusterClient struct {
 	*redis.ClusterClient
 }
 
+type NormalClient struct {
+	*common.BaseComponent
+	*redis.Client
+}
+
+func NewNormalClient(conf *Config) *NormalClient {
+	return &NormalClient{
+		BaseComponent: common.NewBaseComponent(),
+		Client: redis.NewClient(&redis.Options{
+			Addr: conf.Addrs[0],
+		}),
+	}
+}
+
 func NewClusterClient(conf *Config) *ClusterClient {
 	c := &ClusterClient{
 		BaseComponent: common.NewBaseComponent(),
