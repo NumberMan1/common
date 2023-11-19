@@ -44,6 +44,7 @@ func (s *Logger) init() {
 	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 	logger := zap.New(core)
 	s.sugarLogger = logger.Sugar()
+	s.logger = logger
 	zap.ReplaceGlobals(logger)
 }
 
@@ -55,6 +56,6 @@ func getEncoder() zapcore.Encoder {
 }
 
 func (s *Logger) getLogWriter() zapcore.WriteSyncer {
-	file, _ := os.Create(s.path + time.Now().Format("2006-01-02") + ".log")
+	file, _ := os.OpenFile(s.path+time.Now().Format("2006-01-02")+".log", os.O_APPEND|os.O_WRONLY, 0644)
 	return zapcore.AddSync(file)
 }
