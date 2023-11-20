@@ -80,3 +80,13 @@ func (s *Logger) LoggerInfo(format string, a ...any) {
 	sprintf := fmt.Sprintf(format, a)
 	s.logger.Info(sprintf)
 }
+
+func (s *Logger) LoggerFatal(format string, a ...any) {
+	sprintf := fmt.Sprintf(format, a)
+	s.logger.Fatal(sprintf)
+}
+
+func (s *Logger) SugarFatal(format string, a ...any) {
+	sprintf := fmt.Sprintf(format, a)
+	s.logger.Fatal(sprintf)
+}
