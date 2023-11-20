@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
@@ -58,4 +59,24 @@ func getEncoder() zapcore.Encoder {
 func (s *Logger) getLogWriter() zapcore.WriteSyncer {
 	file, _ := os.OpenFile(s.path+time.Now().Format("2006-01-02")+".log", os.O_APPEND|os.O_WRONLY, 0644)
 	return zapcore.AddSync(file)
+}
+
+func (s *Logger) SugarError(format string, a ...any) {
+	sprintf := fmt.Sprintf(format, a)
+	s.sugarLogger.Error(sprintf)
+}
+
+func (s *Logger) SugarInfo(format string, a any) {
+	sprintf := fmt.Sprintf(format, a)
+	s.sugarLogger.Info(sprintf)
+}
+
+func (s *Logger) LoggerError(format string, a ...any) {
+	sprintf := fmt.Sprintf(format, a)
+	s.logger.Error(sprintf)
+}
+
+func (s *Logger) LoggerInfo(format string, a any) {
+	sprintf := fmt.Sprintf(format, a)
+	s.logger.Info(sprintf)
 }
