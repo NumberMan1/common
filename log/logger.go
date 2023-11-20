@@ -66,7 +66,7 @@ func (s *Logger) SugarError(format string, a ...any) {
 	s.sugarLogger.Error(sprintf)
 }
 
-func (s *Logger) SugarInfo(format string, a any) {
+func (s *Logger) SugarInfo(format string, a ...any) {
 	sprintf := fmt.Sprintf(format, a)
 	s.sugarLogger.Info(sprintf)
 }
@@ -76,7 +76,7 @@ func (s *Logger) LoggerError(format string, a ...any) {
 	s.logger.Error(sprintf)
 }
 
-func (s *Logger) LoggerInfo(format string, a any) {
+func (s *Logger) LoggerInfo(format string, a ...any) {
 	sprintf := fmt.Sprintf(format, a)
 	s.logger.Info(sprintf)
 }
