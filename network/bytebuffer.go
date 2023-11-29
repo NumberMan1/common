@@ -103,9 +103,9 @@ func (bf *ByteBuffer) WriteBytes(bytes []byte, startIndex int, length int) {
 func (bf *ByteBuffer) WriteUint16(uint162 uint16) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	if bf.isLittleEndian {
-		binary.Write(bytesBuffer, binary.LittleEndian, uint162)
+		_ = binary.Write(bytesBuffer, binary.LittleEndian, uint162)
 	} else {
-		binary.Write(bytesBuffer, binary.BigEndian, uint162)
+		_ = binary.Write(bytesBuffer, binary.BigEndian, uint162)
 	}
 	b := bytesBuffer.Bytes()
 	bf.WriteBytes(b, 0, len(b))
@@ -114,9 +114,9 @@ func (bf *ByteBuffer) WriteUint16(uint162 uint16) {
 func (bf *ByteBuffer) WriteUint32(uint322 uint32) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	if bf.isLittleEndian {
-		binary.Write(bytesBuffer, binary.LittleEndian, uint322)
+		_ = binary.Write(bytesBuffer, binary.LittleEndian, uint322)
 	} else {
-		binary.Write(bytesBuffer, binary.BigEndian, uint322)
+		_ = binary.Write(bytesBuffer, binary.BigEndian, uint322)
 	}
 	b := bytesBuffer.Bytes()
 	bf.WriteBytes(b, 0, len(b))
@@ -125,9 +125,9 @@ func (bf *ByteBuffer) WriteUint32(uint322 uint32) {
 func (bf *ByteBuffer) WriteUInt64(uint642 uint64) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	if bf.isLittleEndian {
-		binary.Write(bytesBuffer, binary.LittleEndian, uint642)
+		_ = binary.Write(bytesBuffer, binary.LittleEndian, uint642)
 	} else {
-		binary.Write(bytesBuffer, binary.BigEndian, uint642)
+		_ = binary.Write(bytesBuffer, binary.BigEndian, uint642)
 	}
 	b := bytesBuffer.Bytes()
 	bf.WriteBytes(b, 0, len(b))
@@ -136,9 +136,9 @@ func (bf *ByteBuffer) WriteUInt64(uint642 uint64) {
 func (bf *ByteBuffer) WriteInt16(int162 int16) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	if bf.isLittleEndian {
-		binary.Write(bytesBuffer, binary.LittleEndian, int162)
+		_ = binary.Write(bytesBuffer, binary.LittleEndian, int162)
 	} else {
-		binary.Write(bytesBuffer, binary.BigEndian, int162)
+		_ = binary.Write(bytesBuffer, binary.BigEndian, int162)
 	}
 	b := bytesBuffer.Bytes()
 	bf.WriteBytes(b, 0, len(b))
@@ -147,9 +147,9 @@ func (bf *ByteBuffer) WriteInt16(int162 int16) {
 func (bf *ByteBuffer) WriteInt32(int322 int32) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	if bf.isLittleEndian {
-		binary.Write(bytesBuffer, binary.LittleEndian, int322)
+		_ = binary.Write(bytesBuffer, binary.LittleEndian, int322)
 	} else {
-		binary.Write(bytesBuffer, binary.BigEndian, int322)
+		_ = binary.Write(bytesBuffer, binary.BigEndian, int322)
 	}
 	b := bytesBuffer.Bytes()
 	bf.WriteBytes(b, 0, len(b))
@@ -158,9 +158,9 @@ func (bf *ByteBuffer) WriteInt32(int322 int32) {
 func (bf *ByteBuffer) WriteInt64(int642 int64) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	if bf.isLittleEndian {
-		binary.Write(bytesBuffer, binary.LittleEndian, int642)
+		_ = binary.Write(bytesBuffer, binary.LittleEndian, int642)
 	} else {
-		binary.Write(bytesBuffer, binary.BigEndian, int642)
+		_ = binary.Write(bytesBuffer, binary.BigEndian, int642)
 	}
 	b := bytesBuffer.Bytes()
 	bf.WriteBytes(b, 0, len(b))
@@ -169,9 +169,9 @@ func (bf *ByteBuffer) WriteInt64(int642 int64) {
 func (bf *ByteBuffer) WriteFloat32(float322 float32) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	if bf.isLittleEndian {
-		binary.Write(bytesBuffer, binary.LittleEndian, float322)
+		_ = binary.Write(bytesBuffer, binary.LittleEndian, float322)
 	} else {
-		binary.Write(bytesBuffer, binary.BigEndian, float322)
+		_ = binary.Write(bytesBuffer, binary.BigEndian, float322)
 	}
 	b := bytesBuffer.Bytes()
 	bf.WriteBytes(b, 0, len(b))
@@ -180,9 +180,9 @@ func (bf *ByteBuffer) WriteFloat32(float322 float32) {
 func (bf *ByteBuffer) WriteFloat64(float642 float64) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	if bf.isLittleEndian {
-		binary.Write(bytesBuffer, binary.LittleEndian, float642)
+		_ = binary.Write(bytesBuffer, binary.LittleEndian, float642)
 	} else {
-		binary.Write(bytesBuffer, binary.BigEndian, float642)
+		_ = binary.Write(bytesBuffer, binary.BigEndian, float642)
 	}
 	b := bytesBuffer.Bytes()
 	bf.WriteBytes(b, 0, len(b))
@@ -252,9 +252,9 @@ func (bf *ByteBuffer) ReadFloat64() float64 {
 	bytesBuffer := bytes.NewBuffer(bf.Read(8))
 	var x float64
 	if bf.isLittleEndian {
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	} else {
-		binary.Read(bytesBuffer, binary.BigEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.BigEndian, &x)
 	}
 	return x
 }
@@ -262,9 +262,9 @@ func (bf *ByteBuffer) ReadFloat32() float32 {
 	bytesBuffer := bytes.NewBuffer(bf.Read(4))
 	var x float32
 	if bf.isLittleEndian {
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	} else {
-		binary.Read(bytesBuffer, binary.BigEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.BigEndian, &x)
 	}
 	return x
 }
@@ -272,9 +272,9 @@ func (bf *ByteBuffer) ReadUInt64() uint64 {
 	bytesBuffer := bytes.NewBuffer(bf.Read(8))
 	var x uint64
 	if bf.isLittleEndian {
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	} else {
-		binary.Read(bytesBuffer, binary.BigEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.BigEndian, &x)
 	}
 	return x
 }
@@ -283,9 +283,9 @@ func (bf *ByteBuffer) ReadUInt32() uint32 {
 	bytesBuffer := bytes.NewBuffer(bf.Read(4))
 	var x uint32
 	if bf.isLittleEndian {
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	} else {
-		binary.Read(bytesBuffer, binary.BigEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.BigEndian, &x)
 	}
 	return x
 }
@@ -294,9 +294,9 @@ func (bf *ByteBuffer) ReadUInt16() uint16 {
 	bytesBuffer := bytes.NewBuffer(bf.Read(2))
 	var x uint16
 	if bf.isLittleEndian {
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	} else {
-		binary.Read(bytesBuffer, binary.BigEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.BigEndian, &x)
 	}
 	return x
 }
@@ -304,9 +304,9 @@ func (bf *ByteBuffer) ReadInt64() int64 {
 	bytesBuffer := bytes.NewBuffer(bf.Read(8))
 	var x int64
 	if bf.isLittleEndian {
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	} else {
-		binary.Read(bytesBuffer, binary.BigEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.BigEndian, &x)
 	}
 	return x
 }
@@ -314,9 +314,9 @@ func (bf *ByteBuffer) ReadInt32() int32 {
 	bytesBuffer := bytes.NewBuffer(bf.Read(4))
 	var x int32
 	if bf.isLittleEndian {
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	} else {
-		binary.Read(bytesBuffer, binary.BigEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.BigEndian, &x)
 	}
 	return x
 }
@@ -324,9 +324,9 @@ func (bf *ByteBuffer) ReadInt16() int16 {
 	bytesBuffer := bytes.NewBuffer(bf.Read(2))
 	var x int16
 	if bf.isLittleEndian {
-		binary.Read(bytesBuffer, binary.LittleEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.LittleEndian, &x)
 	} else {
-		binary.Read(bytesBuffer, binary.BigEndian, &x)
+		_ = binary.Read(bytesBuffer, binary.BigEndian, &x)
 	}
 	return x
 }
