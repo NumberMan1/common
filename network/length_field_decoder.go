@@ -88,7 +88,7 @@ func (d *LengthFieldDecoder) beginAsyncReceive(ctx context.Context, cancelFunc c
 				return
 			default:
 				// 最多等待10秒
-				err := d.mSocket.SetReadDeadline(time.Now().Add(time.Second * 3))
+				err := d.mSocket.SetReadDeadline(time.Now().Add(time.Second * 10))
 				if err != nil {
 					cancelFunc()
 					continue
