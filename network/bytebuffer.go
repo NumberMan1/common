@@ -27,16 +27,21 @@ type ByteBuffer struct {
 	isLittleEndian bool
 }
 
-// NewByteBuffer 要么提供buf, 要么提供capacity来构造
-func NewByteBuffer(isLittleEndian bool, buf []byte, capacity int) *ByteBuffer {
+// NewByteBufferByBuf 提供buf来构造
+func NewByteBufferByBuf(isLittleEndian bool, buf []byte) *ByteBuffer {
 	b := &ByteBuffer{isLittleEndian: isLittleEndian}
 	if buf != nil {
 		b.buf = buf
 		b.capacity = len(buf)
-	} else {
-		b.buf = make([]byte, capacity)
-		b.capacity = capacity
 	}
+	return b
+}
+
+// NewByteBufferByCapacity 提供capacity来构造
+func NewByteBufferByCapacity(isLittleEndian bool, capacity int) *ByteBuffer {
+	b := &ByteBuffer{isLittleEndian: isLittleEndian}
+	b.buf = make([]byte, capacity)
+	b.capacity = capacity
 	return b
 }
 

@@ -6,7 +6,7 @@ import (
 )
 
 func TestByteBuffer(t *testing.T) {
-	buffer := NewByteBuffer(false, nil, 1024)
+	buffer := NewByteBufferByCapacity(false, 1024)
 	buffer.WriteFloat64(3.3)
 	buffer.WriteFloat32(3.2)
 	buffer.WriteInt64(-142)
