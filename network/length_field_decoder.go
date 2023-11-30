@@ -114,7 +114,7 @@ func (d *LengthFieldDecoder) receive(cancelFunc context.CancelFunc, len int, err
 }
 func (d *LengthFieldDecoder) doDisconnected() {
 	if d.mDisconnectEvent.HasDelegate() {
-		d.mDisconnectEvent.Invoke()
+		d.mDisconnectEvent.Invoke(d)
 	}
 	if d.mSocket != nil {
 		_ = d.mSocket.Close()
