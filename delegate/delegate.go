@@ -39,3 +39,7 @@ func (e *Event[T]) Invoke(args ...T) {
 func (e *Event[T]) HasDelegate() bool {
 	return len(e.delegates) > 0
 }
+
+func (e *Event[T]) Length() int {
+	return len(e.delegates)
+}

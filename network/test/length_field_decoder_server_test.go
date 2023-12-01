@@ -1,13 +1,14 @@
-package network
+package test
 
 import (
 	"context"
 	"fmt"
+	"github.com/NumberMan1/common/network"
 	"net"
 	"testing"
 )
 
-func dCB(args ...*LengthFieldDecoder) {
+func dCB(args ...*network.LengthFieldDecoder) {
 	fmt.Println("关闭")
 }
 func rCB(args ...interface{}) {
@@ -16,7 +17,7 @@ func rCB(args ...interface{}) {
 
 func TestSever(t *testing.T) {
 	rs := []byte("你好, 客户端")
-	buffer := NewByteBufferByCapacity(false, 1024)
+	buffer := network.NewByteBufferByCapacity(false, 1024)
 	l := int32(len(rs))
 	buffer.WriteInt32(l)
 	buffer.WriteBytes(rs, 0, int(l))
@@ -26,7 +27,7 @@ func TestSever(t *testing.T) {
 		println(err)
 	}
 	println(conn.RemoteAddr().String())
-	lengthFieldDecoder := NewLengthFieldDecoderDefault(conn, 0, 4)
+	lengthFieldDecoder := network.NewLengthFieldDecoderDefault(conn, 0, 4)
 	lengthFieldDecoder.AddDataReceivedCB(rCB, "r")
 	lengthFieldDecoder.AddDisconnectCB(dCB, "d")
 	lengthFieldDecoder.Start(context.Background())

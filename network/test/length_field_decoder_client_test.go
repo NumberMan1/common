@@ -1,7 +1,8 @@
-package network
+package test
 
 import (
 	"context"
+	"github.com/NumberMan1/common/network"
 	"net"
 	"testing"
 )
@@ -15,7 +16,7 @@ import (
 
 func TestClient(t *testing.T) {
 	rs := []byte("你好, 服务器")
-	buffer := NewByteBufferByCapacity(false, 1024)
+	buffer := network.NewByteBufferByCapacity(false, 1024)
 	l := int32(len(rs))
 	buffer.WriteInt32(l)
 	buffer.WriteBytes(rs, 0, int(l))
@@ -24,7 +25,7 @@ func TestClient(t *testing.T) {
 		println(err)
 	}
 	println(conn.RemoteAddr().String())
-	lengthFieldDecoder := NewLengthFieldDecoderDefault(conn, 0, 4)
+	lengthFieldDecoder := network.NewLengthFieldDecoderDefault(conn, 0, 4)
 	lengthFieldDecoder.AddDataReceivedCB(rCB, "r")
 	lengthFieldDecoder.AddDisconnectCB(dCB, "d")
 	lengthFieldDecoder.Start(context.Background())
