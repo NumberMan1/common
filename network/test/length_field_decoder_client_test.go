@@ -15,6 +15,12 @@ import (
 //}
 
 func TestClient(t *testing.T) {
+	r := network.DataReceivedEventHandler{
+		Op: rCB,
+	}
+	d := network.DisconnectedEventHandler{
+		Op: dCB,
+	}
 	rs := []byte("你好, 服务器")
 	buffer := network.NewByteBufferByCapacity(false, 1024)
 	l := int32(len(rs))
@@ -26,9 +32,19 @@ func TestClient(t *testing.T) {
 	}
 	println(conn.RemoteAddr().String())
 	lengthFieldDecoder := network.NewLengthFieldDecoderDefault(conn, 0, 4)
-	lengthFieldDecoder.AddDataReceivedCB(rCB, "r")
-	lengthFieldDecoder.AddDisconnectCB(dCB, "d")
+	lengthFieldDecoder.AddDataReceivedCB(r, "r")
+	lengthFieldDecoder.AddDisconnectCB(d, "d")
 	lengthFieldDecoder.Start(context.Background())
 	conn.Write(buffer.ToArray())
+	//rs = []byte("你好, 服务器 第2次")
+	//buffer = network.NewByteBufferByCapacity(false, 1024)
+	//l = int32(len(rs))
+	//buffer.WriteInt32(l)
+	//buffer.WriteBytes(rs, 0, int(l))
+	//_, err = conn.Write(buffer.ToArray())
+	//if err != nil {
+	//	println(err)
+	//	return
+	//}
 	select {}
 }

@@ -12,13 +12,22 @@ import (
 )
 
 // DataReceivedEventHandler 成功收到消息的委托事件
-// 实际的DataReceivedEventHandler参数为*LengthFieldDecoder, []byte
-// type DataReceivedEventHandler func(*LengthFieldDecoder, []byte)
-type DataReceivedEventHandler func(...interface{})
+type DataReceivedEventHandler struct {
+	Op func(*LengthFieldDecoder, []byte)
+}
+
+func (d DataReceivedEventHandler) Operator(args ...any) {
+	d.Op(args[0].(*LengthFieldDecoder), args[1].([]byte))
+}
 
 // DisconnectedEventHandler 连接断开的委托事件
-// 实际只处理第一个*LengthFieldDecoder
-type DisconnectedEventHandler func(...*LengthFieldDecoder)
+type DisconnectedEventHandler struct {
+	Op func(*LengthFieldDecoder)
+}
+
+func (d DisconnectedEventHandler) Operator(args ...any) {
+	d.Op(args[0].(*LengthFieldDecoder))
+}
 
 type LengthFieldDecoder struct {
 	isStart           bool
@@ -33,16 +42,16 @@ type LengthFieldDecoder struct {
 	mOffset             int    //读取位置
 	mSize               int    ///	一次性接收数据的最大字节，默认64k
 	// 连接断开的委托事件
-	mDisconnectEvent delegate.Event[*LengthFieldDecoder]
-	mReceivedEvent   delegate.Event[interface{}]
+	mDisconnectEvent delegate.Event[DisconnectedEventHandler]
+	mReceivedEvent   delegate.Event[DataReceivedEventHandler]
 }
 
 func (d *LengthFieldDecoder) AddDisconnectCB(handler DisconnectedEventHandler, tag string) {
-	d.mDisconnectEvent.AddDelegate(delegate.NewDelegate[*LengthFieldDecoder](handler, tag))
+	d.mDisconnectEvent.AddDelegate(delegate.NewDelegate(handler, tag))
 }
 
 func (d *LengthFieldDecoder) AddDataReceivedCB(handler DataReceivedEventHandler, tag string) {
-	d.mReceivedEvent.AddDelegate(delegate.NewDelegate[interface{}](handler, tag))
+	d.mReceivedEvent.AddDelegate(delegate.NewDelegate(handler, tag))
 }
 
 func NewLengthFieldDecoder(conn net.Conn, lengthFieldOffset int,
@@ -57,8 +66,8 @@ func NewLengthFieldDecoder(conn net.Conn, lengthFieldOffset int,
 		initialBytesToStrip: initialBytesToStrip,
 		mSize:               maxBufferLength,
 		mBuffer:             make([]byte, maxBufferLength),
-		mDisconnectEvent:    delegate.Event[*LengthFieldDecoder]{},
-		mReceivedEvent:      delegate.Event[interface{}]{},
+		mDisconnectEvent:    delegate.Event[DisconnectedEventHandler]{},
+		mReceivedEvent:      delegate.Event[DataReceivedEventHandler]{},
 	}
 }
 
@@ -93,7 +102,7 @@ func (d *LengthFieldDecoder) beginAsyncReceive(ctx context.Context, cancelFunc c
 					cancelFunc()
 					continue
 				}
-				n, err := d.mSocket.Read(d.mBuffer[d.mOffset:])
+				n, err := d.mSocket.Read(d.mBuffer[d.mOffset : d.mSize-d.mOffset])
 				d.receive(cancelFunc, n, err)
 			}
 		}
@@ -177,8 +186,8 @@ func (d *LengthFieldDecoder) onReceiveData(len int) error {
 		if d.mReceivedEvent.HasDelegate() {
 			d.mReceivedEvent.Invoke(d, data)
 			//fmt.Println("完成一个数据包")
-			break
+
 		}
 	}
-	return nil
+	//return nil
 }
