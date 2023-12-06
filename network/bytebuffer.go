@@ -5,11 +5,24 @@ import (
 	"encoding/binary"
 	"slices"
 	"sync"
+	"unsafe"
 )
 
 var (
 	mutex = sync.Mutex{}
 )
+
+func IsLittleEndian() bool {
+	var value int32 = 1 // 占4byte 转换成16进制 0x00 00 00 01
+	// 大端(16进制)：00 00 00 01
+	// 小端(16进制)：01 00 00 00
+	pointer := unsafe.Pointer(&value)
+	pb := (*byte)(pointer)
+	if *pb != 1 {
+		return false
+	}
+	return true
+}
 
 type ByteBuffer struct {
 	//字节缓存区
@@ -221,8 +234,18 @@ func (bf *ByteBuffer) WriteString(string2 string) {
 	if string2 == "" {
 		bf.WriteInt32(-1)
 	} else {
-		bf.WriteInt32(int32(len(string2)))
-		bf.WriteBytes([]byte(string2), 0, len(string2))
+		b := []byte(string2)
+		if bf.isLittleEndian {
+			if !IsLittleEndian() {
+				slices.Reverse(b)
+			}
+		} else {
+			if IsLittleEndian() {
+				slices.Reverse(b)
+			}
+		}
+		bf.WriteInt32(int32(len(b)))
+		bf.WriteBytes(b, 0, len(b))
 	}
 }
 
@@ -231,8 +254,17 @@ func (bf *ByteBuffer) ReadString() string {
 	if l < 0 {
 		return ""
 	}
-	bs := bf.Read(int(l))
-	return string(bs)
+	read := bf.Read(int(l))
+	if bf.isLittleEndian {
+		if !IsLittleEndian() {
+			slices.Reverse(read)
+		}
+	} else {
+		if IsLittleEndian() {
+			slices.Reverse(read)
+		}
+	}
+	return string(read)
 }
 
 /*ReadByte

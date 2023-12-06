@@ -12,7 +12,9 @@ func dCB(*network.LengthFieldDecoder) {
 	fmt.Println("关闭")
 }
 func rCB(sender *network.LengthFieldDecoder, data []byte) {
-	fmt.Printf("收到%v\n", string(data))
+	fmt.Printf("收到%v\n", data)
+	buffer := network.NewByteBufferByBuf(false, data)
+	fmt.Printf("收到%v\n", buffer.ReadString())
 }
 
 func TestSever(t *testing.T) {

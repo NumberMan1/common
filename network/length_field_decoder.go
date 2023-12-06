@@ -155,7 +155,6 @@ func (d *LengthFieldDecoder) onReceiveData(len int) error {
 			d.mOffset = remain
 			return nil
 		}
-
 		//获取包长度
 		temp := make([]byte, 4)
 		lenOffset := d.mOffset + d.lengthFieldOffset
@@ -186,7 +185,6 @@ func (d *LengthFieldDecoder) onReceiveData(len int) error {
 		if d.mReceivedEvent.HasDelegate() {
 			d.mReceivedEvent.Invoke(d, data)
 			//fmt.Println("完成一个数据包")
-
 		}
 	}
 	//return nil
