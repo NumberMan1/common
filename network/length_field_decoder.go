@@ -39,8 +39,9 @@ type LengthFieldDecoder struct {
 	lengthAdjustment    int
 	initialBytesToStrip int    //结果数据中前几个字节不需要的字节数
 	mBuffer             []byte //接收数据的缓存空间
-	mOffset             int    //读取位置
-	mSize               int    ///	一次性接收数据的最大字节，默认64k
+	//mBuffer *ByteBuffer //接收数据的缓存空间
+	mOffset int //读取位置
+	mSize   int ///	一次性接收数据的最大字节，默认64k
 	// 连接断开的委托事件
 	mDisconnectEvent delegate.Event[DisconnectedEventHandler]
 	mReceivedEvent   delegate.Event[DataReceivedEventHandler]
@@ -66,8 +67,9 @@ func NewLengthFieldDecoder(conn net.Conn, lengthFieldOffset int,
 		initialBytesToStrip: initialBytesToStrip,
 		mSize:               maxBufferLength,
 		mBuffer:             make([]byte, maxBufferLength),
-		mDisconnectEvent:    delegate.Event[DisconnectedEventHandler]{},
-		mReceivedEvent:      delegate.Event[DataReceivedEventHandler]{},
+		//mBuffer:          NewByteBufferByCapacity(false, maxBufferLength),
+		mDisconnectEvent: delegate.Event[DisconnectedEventHandler]{},
+		mReceivedEvent:   delegate.Event[DataReceivedEventHandler]{},
 	}
 }
 
@@ -103,6 +105,10 @@ func (d *LengthFieldDecoder) beginAsyncReceive(ctx context.Context, cancelFunc c
 					continue
 				}
 				n, err := d.mSocket.Read(d.mBuffer[d.mOffset : d.mSize-d.mOffset])
+				//bytes := make([]byte, 1024)
+				//n, err := d.mSocket.Read(bytes[d.mOffset : d.mSize-d.mOffset])
+				//n, err := d.mSocket.Read(d.mBuffer.buf[d.mOffset : d.mSize-d.mOffset])
+				//fmt.Printf("%v %v", n, d.mBuffer[d.mOffset:d.mSize-d.mOffset])
 				d.receive(cancelFunc, n, err)
 			}
 		}
@@ -144,7 +150,7 @@ func (d *LengthFieldDecoder) onReceiveData(len int) error {
 	//循环解析
 	for {
 		remain := size - d.mOffset //剩余未处理的长度
-
+		//println(remain)
 		//如果未处理的数据超出限制
 		if remain > d.mSize {
 			return errors.New("未处理的数据超出限制")
@@ -152,6 +158,7 @@ func (d *LengthFieldDecoder) onReceiveData(len int) error {
 		if remain < headLen {
 			//接收的数据不够一个完整的包，继续接收
 			copy(d.mBuffer[0:remain], d.mBuffer[d.mOffset:])
+			//copy(d.mBuffer.buf[0:remain], d.mBuffer.buf[d.mOffset:])
 			d.mOffset = remain
 			return nil
 		}
@@ -162,23 +169,27 @@ func (d *LengthFieldDecoder) onReceiveData(len int) error {
 		bytesBuffer := bytes.NewBuffer(temp)
 		var bodyLen int32
 		_ = binary.Read(bytesBuffer, binary.BigEndian, &bodyLen)
+		//bodyLen := d.mBuffer.ReadInt32()
 		if remain < headLen+adj+int(bodyLen) {
 			copy(d.mBuffer[0:remain], d.mBuffer[d.mOffset:])
+			//copy(d.mBuffer.buf[0:remain], d.mBuffer.buf[d.mOffset:])
 			//接收的数据不够一个完整的包，继续接收
 			d.mOffset = remain
 			return nil
 		}
 
-		////body的读取位置
-		//bodyStart := d.mOffset + max(headLen, headLen+adj)
-		////body的真实长度
-		//bodyCount := min(int(bodyLen), int(bodyLen)+adj)
-		//fmt.Printf("bodyStart=%v, bodyCount=%v, remain=%v\n", bodyStart, bodyCount, remain)
+		//body的读取位置
+		bodyStart := d.mOffset + max(headLen, headLen+adj)
+		//body的真实长度
+		bodyCount := min(int(bodyLen), int(bodyLen)+adj)
+		//fmt.Printf("buf:%v\n", d.mBuffer[d.mOffset:d.mSize-d.mOffset])
+		fmt.Printf("bodyStart=%v, bodyCount=%v, remain=%v\n", bodyStart, bodyCount, remain)
 		//获取包体
 		total := headLen + adj + int(bodyLen) //数据包总长度
 		count := total - d.initialBytesToStrip
 		data := make([]byte, count)
 		copy(data[0:count], d.mBuffer[d.mOffset+d.initialBytesToStrip:])
+		//d.mBuffer.ReadBytes(data, 0, count)
 		d.mOffset += total
 
 		//完成一个数据包

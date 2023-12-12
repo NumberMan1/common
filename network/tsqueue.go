@@ -12,17 +12,17 @@ type IQueue interface {
 	Back() (e interface{})  //获取该队列尾元素
 }
 
-type TSQueue struct {
-	data  []interface{} //泛型切片
-	begin uint64        //首节点下标
-	end   uint64        //尾节点下标
-	cap   uint64        //容量
-	mutex sync.Mutex    //并发控制锁
+type TSQueue[T any] struct {
+	data  []T        //泛型切片
+	begin uint64     //首节点下标
+	end   uint64     //尾节点下标
+	cap   uint64     //容量
+	mutex sync.Mutex //并发控制锁
 }
 
-func New() (q *TSQueue) {
-	return &TSQueue{
-		data:  make([]interface{}, 1, 1),
+func NewTSQueue[T any]() (q *TSQueue[T]) {
+	return &TSQueue[T]{
+		data:  make([]T, 1),
 		begin: 0,
 		end:   0,
 		cap:   1,
@@ -30,24 +30,24 @@ func New() (q *TSQueue) {
 	}
 }
 
-func (q *TSQueue) Size() (num uint64) {
+func (q *TSQueue[T]) Size() (num uint64) {
 	return q.end - q.begin
 }
 
-func (q *TSQueue) Clear() {
+func (q *TSQueue[T]) Clear() {
 	q.mutex.Lock()
-	q.data = make([]interface{}, 1, 1)
+	q.data = make([]T, 1)
 	q.begin = 0
 	q.end = 0
 	q.cap = 1
 	q.mutex.Unlock()
 }
 
-func (q *TSQueue) Empty() (b bool) {
+func (q *TSQueue[T]) Empty() (b bool) {
 	return q.Size() <= 0
 }
 
-func (q *TSQueue) Push(e interface{}) {
+func (q *TSQueue[T]) Push(e T) {
 	q.mutex.Lock()
 	if q.end < q.cap {
 		//不需要扩容
@@ -74,7 +74,7 @@ func (q *TSQueue) Push(e interface{}) {
 				q.cap += 2 ^ 16
 			}
 			//复制扩容前的元素
-			tmp := make([]interface{}, q.cap, q.cap)
+			tmp := make([]T, q.cap)
 			copy(tmp, q.data)
 			q.data = tmp
 		}
@@ -84,10 +84,10 @@ func (q *TSQueue) Push(e interface{}) {
 	q.mutex.Unlock()
 }
 
-func (q *TSQueue) Pop() (e interface{}) {
+func (q *TSQueue[T]) Pop() (e T) {
 	if q.Empty() {
 		q.Clear()
-		return nil
+		return
 	}
 	q.mutex.Lock()
 	e = q.data[q.begin]
@@ -96,7 +96,7 @@ func (q *TSQueue) Pop() (e interface{}) {
 		//首部冗余超过2^10或首部冗余超过实际使用
 		q.cap -= q.begin
 		q.end -= q.begin
-		tmp := make([]interface{}, q.cap, q.cap)
+		tmp := make([]T, q.cap)
 		copy(tmp, q.data[q.begin:])
 		q.data = tmp
 		q.begin = 0
@@ -105,18 +105,18 @@ func (q *TSQueue) Pop() (e interface{}) {
 	return e
 }
 
-func (q *TSQueue) Front() (e interface{}) {
+func (q *TSQueue[T]) Front() (e T) {
 	if q.Empty() {
 		q.Clear()
-		return nil
+		return
 	}
 	return q.data[q.begin]
 }
 
-func (q *TSQueue) Back() (e interface{}) {
+func (q *TSQueue[T]) Back() (e T) {
 	if q.Empty() {
 		q.Clear()
-		return nil
+		return
 	}
 	return q.data[q.end-1]
 }

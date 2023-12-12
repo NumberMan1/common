@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "./proto";
+
+enum PackageID {
+  package = 0;
+  request = 1;
+  response = 2;
+
+  userRegisterRequest = 500;
+  userRegisterResponse = 501;
+  userLoginRequest = 502;
+  userLoginResponse = 503;
+
+  vector3 = 2000;
+  entity = 2001;
+}
+
+message Vector3 {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message Entity {
+  int32 id = 1;
+  int32 speed = 2;
+  Vector3 position = 3;
+  Vector3 rotation = 4;
+}
+
+message Package {
+  PackageID id = 1;
+  Request request = 2;
+  Response response = 3;
+}
+
+message Request {
+  UserRegisterRequest userRegister = 1;
+  UserLoginRequest UserLogin = 2;
+}
+
+message Response {
+  UserRegisterResponse userRegister = 1;
+  UserLoginResponse userLogin = 2;
+}
+
+message UserRegisterRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message UserRegisterResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message UserLoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message UserLoginResponse {
+  int32 code = 1;
+  string message = 2;
+}
