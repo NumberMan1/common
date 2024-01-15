@@ -6,6 +6,11 @@ import (
 )
 
 func TestLogger(t *testing.T) {
+	d1 := LogInit(true, zap.InfoLevel, "")
+	d1.Debug("debug1")
+	d1.Debug("debug2")
+	d1.Info("debug3")
+	d1.Error("debug4")
 	d := LogInit(true, zap.InfoLevel, "C:\\Users\\hp\\Desktop\\Project\\fo_go\\self-work\\mmo-server\\common\\logger\\test2")
 	d.Debug("debug1")
 	d.Debug("debug2")
@@ -16,6 +21,7 @@ func TestLogger(t *testing.T) {
 	i.Info("info2")
 	i.Debug("info3")
 	i.Error("info4")
+	defer d1.Sync()
 	defer d.Sync()
 	defer i.Sync()
 }

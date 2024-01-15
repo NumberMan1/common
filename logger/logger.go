@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+// LogInit isJson决定文件输出的是否为json格式, level决定输出的最小等级,
+// filePath为路径名比如/log/test,最终为/log/test日期.log
+// filePath不输出到文件直接传空字符串
 func LogInit(isJson bool, level zapcore.Level, filePath string) *zap.SugaredLogger {
 	pe := zap.NewProductionEncoderConfig()
 	pe.EncodeTime = zapcore.ISO8601TimeEncoder
@@ -17,11 +20,18 @@ func LogInit(isJson bool, level zapcore.Level, filePath string) *zap.SugaredLogg
 		fileEncoder = zapcore.NewConsoleEncoder(pe)
 	}
 	consoleEncoder := zapcore.NewConsoleEncoder(pe)
-	file, _ := os.OpenFile(filePath+time.Now().Format("2006-01-02")+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	core := zapcore.NewTee(
-		zapcore.NewCore(fileEncoder, zapcore.AddSync(file), level),
-		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level),
-	)
+	var core zapcore.Core
+	if len(filePath) > 0 {
+		file, _ := os.OpenFile(filePath+time.Now().Format("2006-01-02")+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		core = zapcore.NewTee(
+			zapcore.NewCore(fileEncoder, zapcore.AddSync(file), level),
+			zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level),
+		)
+	} else {
+		core = zapcore.NewTee(
+			zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level),
+		)
+	}
 	l := zap.New(core)
 	return l.Sugar()
 }
