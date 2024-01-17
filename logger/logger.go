@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
@@ -11,6 +12,30 @@ var SLoggerConsole *zap.SugaredLogger
 
 func init() {
 	SLoggerConsole = LogInit(false, zap.DebugLevel, "")
+}
+
+func SLCDebug(format string, args ...any) {
+	SLoggerConsole.Debug(fmt.Sprintf(format, args))
+}
+
+func SLCInfo(format string, args ...any) {
+	SLoggerConsole.Info(fmt.Sprintf(format, args))
+}
+
+func SLCWarn(format string, args ...any) {
+	SLoggerConsole.Warn(fmt.Sprintf(format, args))
+}
+
+func SLCError(format string, args ...any) {
+	SLoggerConsole.Error(fmt.Sprintf(format, args))
+}
+
+func SLCFatal(format string, args ...any) {
+	SLoggerConsole.Fatal(fmt.Sprintf(format, args))
+}
+
+func SLCPanic(format string, args ...any) {
+	SLoggerConsole.Panic(fmt.Sprintf(format, args))
 }
 
 // LogInit isJson决定文件输出的是否为json格式, level决定输出的最小等级,
