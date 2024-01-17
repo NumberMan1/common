@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+var SLoggerConsole *zap.SugaredLogger
+
+func init() {
+	SLoggerConsole = LogInit(false, zap.DebugLevel, "")
+}
+
 // LogInit isJson决定文件输出的是否为json格式, level决定输出的最小等级,
 // filePath为路径名比如/log/test,最终为/log/test日期.log
 // filePath不输出到文件直接传空字符串
