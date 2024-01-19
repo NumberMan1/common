@@ -31,9 +31,9 @@ func (s *SocketReceiver) Start() {
 func (s *SocketReceiver) beginReceive(ctx context.Context, cancelFunc context.CancelFunc) {
 	go func() {
 		defer func() {
-			//if err := recover(); err != nil {
-			//	logger.SLCError("SocketReceiver's beginReceive recover error %v", err)
-			//}
+			if err := recover(); err != nil {
+				logger.SLCError("SocketReceiver's beginReceive recover error %v", err)
+			}
 		}()
 		for {
 			select {
@@ -92,7 +92,7 @@ func (s *SocketReceiver) doReceive(l int) {
 func (s *SocketReceiver) disconnected() {
 	if s.Disconnected != nil {
 		s.Disconnected()
-		s.mSocket.Close()
+		_ = s.mSocket.Close()
 	}
 	s.mSocket = nil
 }
