@@ -1,13 +1,12 @@
-package test
+package core
 
 import (
 	"fmt"
-	"github.com/NumberMan1/common/summer/core"
 	"testing"
 )
 
 func TestByteBuffer(t *testing.T) {
-	buffer := core.NewByteBufferByCapacity(false, 1024)
+	buffer := NewByteBufferByCapacity(false, 1024)
 	buffer.WriteFloat64(3.3)
 	buffer.WriteFloat32(3.2)
 	buffer.WriteInt64(-142)
