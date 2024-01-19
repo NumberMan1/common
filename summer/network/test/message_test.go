@@ -1,7 +1,7 @@
 package test
 
 import (
-	pt "github.com/NumberMan1/common/protocol/gen/proto"
+	pt "github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"google.golang.org/protobuf/proto"
 	"reflect"
 	"testing"

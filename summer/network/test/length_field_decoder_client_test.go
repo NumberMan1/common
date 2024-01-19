@@ -2,7 +2,7 @@ package test
 
 import (
 	"context"
-	"github.com/NumberMan1/common/network"
+	"github.com/NumberMan1/common/summer/core"
 	"net"
 	"testing"
 )
@@ -15,14 +15,14 @@ import (
 //}
 
 func TestClient(t *testing.T) {
-	r := network.DataReceivedEventHandler{
+	r := core.DataReceivedEventHandler{
 		Op: rCB,
 	}
-	d := network.DisconnectedEventHandler{
+	d := core.DisconnectedEventHandler{
 		Op: dCB,
 	}
 	rs := []byte("你好, 服务器")
-	buffer := network.NewByteBufferByCapacity(false, 1024)
+	buffer := core.NewByteBufferByCapacity(false, 1024)
 	l := int32(len(rs))
 	buffer.WriteInt32(l)
 	buffer.WriteBytes(rs, 0, int(l))
@@ -31,13 +31,13 @@ func TestClient(t *testing.T) {
 		println(err)
 	}
 	println(conn.RemoteAddr().String())
-	lengthFieldDecoder := network.NewLengthFieldDecoderDefault(conn, 0, 4)
+	lengthFieldDecoder := core.NewLengthFieldDecoderDefault(conn, 0, 4)
 	lengthFieldDecoder.AddDataReceivedCB(r, "r")
 	lengthFieldDecoder.AddDisconnectCB(d, "d")
 	lengthFieldDecoder.Start(context.Background())
 	conn.Write(buffer.ToArray())
 	//rs = []byte("你好, 服务器 第2次")
-	//buffer = network.NewByteBufferByCapacity(false, 1024)
+	//buffer = core.NewByteBufferByCapacity(false, 1024)
 	//l = int32(len(rs))
 	//buffer.WriteInt32(l)
 	//buffer.WriteBytes(rs, 0, int(l))

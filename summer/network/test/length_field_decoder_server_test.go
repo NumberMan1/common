@@ -3,29 +3,29 @@ package test
 import (
 	"context"
 	"fmt"
-	"github.com/NumberMan1/common/network"
+	"github.com/NumberMan1/common/summer/core"
 	"net"
 	"testing"
 )
 
-func dCB(*network.LengthFieldDecoder) {
+func dCB(*core.LengthFieldDecoder) {
 	fmt.Println("关闭")
 }
-func rCB(sender *network.LengthFieldDecoder, data []byte) {
+func rCB(sender *core.LengthFieldDecoder, data []byte) {
 	fmt.Printf("收到%v\n", data)
-	buffer := network.NewByteBufferByBuf(false, data)
+	buffer := core.NewByteBufferByBuf(false, data)
 	fmt.Printf("收到%v\n", buffer.ReadString())
 }
 
 func TestSever(t *testing.T) {
-	r := network.DataReceivedEventHandler{
+	r := core.DataReceivedEventHandler{
 		Op: rCB,
 	}
-	d := network.DisconnectedEventHandler{
+	d := core.DisconnectedEventHandler{
 		Op: dCB,
 	}
 	rs := []byte("你好, 客户端")
-	buffer := network.NewByteBufferByCapacity(false, 1024)
+	buffer := core.NewByteBufferByCapacity(false, 1024)
 	l := int32(len(rs))
 	buffer.WriteInt32(l)
 	buffer.WriteBytes(rs, 0, int(l))
@@ -35,7 +35,7 @@ func TestSever(t *testing.T) {
 		println(err)
 	}
 	println(conn.RemoteAddr().String())
-	lengthFieldDecoder := network.NewLengthFieldDecoderDefault(conn, 0, 4)
+	lengthFieldDecoder := core.NewLengthFieldDecoderDefault(conn, 0, 4)
 	lengthFieldDecoder.AddDataReceivedCB(r, "r")
 	lengthFieldDecoder.AddDisconnectCB(d, "d")
 	lengthFieldDecoder.Start(context.Background())

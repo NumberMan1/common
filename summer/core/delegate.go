@@ -1,4 +1,4 @@
-package delegate
+package core
 
 //type Delegate[T any] func(args ...T)
 

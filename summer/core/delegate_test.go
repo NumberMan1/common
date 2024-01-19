@@ -1,4 +1,4 @@
-package delegate
+package core
 
 import (
 	"testing"

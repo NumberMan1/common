@@ -3,19 +3,19 @@ syntax = "proto3";
 package proto;
 option go_package = "./proto";
 
-enum PackageID {
-  package = 0;
-  request = 1;
-  response = 2;
-
-  userRegisterRequest = 500;
-  userRegisterResponse = 501;
-  userLoginRequest = 502;
-  userLoginResponse = 503;
-
-  vector3 = 2000;
-  entity = 2001;
-}
+//enum PackageID {
+//  package = 0;
+//  request = 1;
+//  response = 2;
+//
+//  userRegisterRequest = 500;
+//  userRegisterResponse = 501;
+//  userLoginRequest = 502;
+//  userLoginResponse = 503;
+//
+//  vector3 = 2000;
+//  entity = 2001;
+//}
 
 message Vector3 {
   float x = 1;
@@ -28,12 +28,6 @@ message Entity {
   int32 speed = 2;
   Vector3 position = 3;
   Vector3 rotation = 4;
-}
-
-message Package {
-  PackageID id = 1;
-  Request request = 2;
-  Response response = 3;
 }
 
 message Request {

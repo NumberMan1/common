@@ -1,11 +1,10 @@
-package network
+package core
 
 import (
 	"bytes"
 	"context"
 	"encoding/binary"
 	"fmt"
-	"github.com/NumberMan1/common/delegate"
 	"github.com/pkg/errors"
 	"net"
 	"time"
@@ -13,20 +12,20 @@ import (
 
 // DataReceivedEventHandler 成功收到消息的委托事件
 type DataReceivedEventHandler struct {
-	Op func(*LengthFieldDecoder, []byte)
+	Op func(obj any, data []byte)
 }
 
 func (d DataReceivedEventHandler) Operator(args ...any) {
-	d.Op(args[0].(*LengthFieldDecoder), args[1].([]byte))
+	d.Op(args[0], args[1].([]byte))
 }
 
 // DisconnectedEventHandler 连接断开的委托事件
 type DisconnectedEventHandler struct {
-	Op func(*LengthFieldDecoder)
+	Op func(obj any)
 }
 
 func (d DisconnectedEventHandler) Operator(args ...any) {
-	d.Op(args[0].(*LengthFieldDecoder))
+	d.Op(args[0])
 }
 
 type LengthFieldDecoder struct {
@@ -43,16 +42,16 @@ type LengthFieldDecoder struct {
 	mOffset int //读取位置
 	mSize   int ///	一次性接收数据的最大字节，默认64k
 	// 连接断开的委托事件
-	mDisconnectEvent delegate.Event[DisconnectedEventHandler]
-	mReceivedEvent   delegate.Event[DataReceivedEventHandler]
+	mDisconnectEvent Event[DisconnectedEventHandler]
+	mReceivedEvent   Event[DataReceivedEventHandler]
 }
 
 func (d *LengthFieldDecoder) AddDisconnectCB(handler DisconnectedEventHandler, tag string) {
-	d.mDisconnectEvent.AddDelegate(delegate.NewDelegate(handler, tag))
+	d.mDisconnectEvent.AddDelegate(NewDelegate(handler, tag))
 }
 
 func (d *LengthFieldDecoder) AddDataReceivedCB(handler DataReceivedEventHandler, tag string) {
-	d.mReceivedEvent.AddDelegate(delegate.NewDelegate(handler, tag))
+	d.mReceivedEvent.AddDelegate(NewDelegate(handler, tag))
 }
 
 func NewLengthFieldDecoder(conn net.Conn, lengthFieldOffset int,
@@ -68,8 +67,8 @@ func NewLengthFieldDecoder(conn net.Conn, lengthFieldOffset int,
 		mSize:               maxBufferLength,
 		mBuffer:             make([]byte, maxBufferLength),
 		//mBuffer:          NewByteBufferByCapacity(false, maxBufferLength),
-		mDisconnectEvent: delegate.Event[DisconnectedEventHandler]{},
-		mReceivedEvent:   delegate.Event[DataReceivedEventHandler]{},
+		mDisconnectEvent: Event[DisconnectedEventHandler]{},
+		mReceivedEvent:   Event[DataReceivedEventHandler]{},
 	}
 }
 
