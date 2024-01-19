@@ -99,5 +99,5 @@ func (s *SocketReceiver) disconnected() {
 
 // 获取大端模式int值
 func (s *SocketReceiver) getInt32BE(data []byte, index int) int32 {
-	return int32(data[index]<<0x18) | int32(data[index+1]<<0x10) | int32(data[index+2]<<8) | int32(data[index+3])
+	return int32(data[index])<<0x18 | int32(data[index+1])<<0x10 | int32(data[index+2])<<8 | int32(data[index+3])
 }
