@@ -25,9 +25,9 @@ func (n *NetService) Start() {
 }
 
 func OnClientConnected(conn network.Connection) {
-	logger.SLCDebug("客户端接入")
+	logger.SLCInfo("客户端接入")
 }
 
 func OnDisconnected(conn network.Connection) {
-	logger.SLCDebug("连接断开:%v", conn.Socket().RemoteAddr().String())
+	logger.SLCInfo("连接断开:%v", conn.Socket().RemoteAddr().String())
 }

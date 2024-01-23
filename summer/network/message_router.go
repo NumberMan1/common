@@ -4,6 +4,7 @@ import (
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer/core"
 	"google.golang.org/protobuf/proto"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -63,7 +64,7 @@ func (mr *MessageRouter) Subscribe(name string, handler MessageHandler) {
 		mr.delegateMap[name] = core.Event[MessageHandler]{}
 	}
 	d := mr.delegateMap[name]
-	d.AddDelegate(core.NewDelegate(handler, name))
+	d.AddDelegate(core.NewDelegate(handler, reflect.ValueOf(handler.Op).String()))
 	mr.delegateMap[name] = d
 	logger.SLCDebug("Subscribe:%v", name)
 }
@@ -75,7 +76,7 @@ func (mr *MessageRouter) Off(name string, handler MessageHandler) {
 		mr.delegateMap[name] = core.Event[MessageHandler]{}
 	}
 	d := mr.delegateMap[name]
-	d.RemoveDelegates(name)
+	d.RemoveDelegates(reflect.ValueOf(handler.Op).String())
 	logger.SLCDebug("Off:%v", name)
 }
 
@@ -125,10 +126,10 @@ func (mr *MessageRouter) Stop() {
 }
 
 func (mr *MessageRouter) messageWork() {
-	logger.SLCDebug("worker thread start")
+	logger.SLCInfo("worker thread start")
 	defer func() {
 		if err := recover(); err != nil {
-			logger.SLCDebug("MessageRouter fire error %v\n", err)
+			logger.SLCError("MessageRouter fire error %v\n", err)
 		}
 		a := atomic.Int32{}
 		a.Store(int32(mr.workerCount))
@@ -138,7 +139,6 @@ func (mr *MessageRouter) messageWork() {
 	a.Store(int32(mr.workerCount))
 	mr.workerCount = int(a.Add(1))
 	for mr.Running {
-		//fmt.Println(mr.messageQueue.Size())
 		if mr.messageQueue.Empty() {
 			mr.threadEvent.Wait() //可以通过Set()唤醒
 			continue
@@ -154,6 +154,7 @@ func (mr *MessageRouter) messageWork() {
 			mr.executeMessage(msg)
 		}
 	}
+	logger.SLCInfo("worker thread end")
 }
 
 // executeMessage 处理消息

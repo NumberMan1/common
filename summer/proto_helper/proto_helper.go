@@ -4,7 +4,6 @@ package proto_helper
 
 import (
 	"github.com/NumberMan1/common/logger"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
@@ -28,7 +27,7 @@ func init() {
 		return true
 	})
 	list := make([]string, 0)
-	for k, _ := range registry {
+	for k := range registry {
 		list = append(list, k)
 	}
 	sort.Slice(list, func(i, j int) bool {
@@ -39,7 +38,7 @@ func init() {
 	})
 	for i, fullName := range list {
 		t := registry[fullName]
-		logger.LogInit(false, zap.DebugLevel, "").Debugf("Proto类型注册：%d - %s", i, fullName)
+		logger.SLCDebug("Proto类型注册：%d - %s", i, fullName)
 		dict1[i] = t
 		dict2[t] = i
 	}
@@ -74,6 +73,6 @@ func ParseFrom(typeCode int, data []byte, offset, len int) (msg proto.Message, e
 	}
 	msg = pbType.New().Interface()
 	err = proto.Unmarshal(data[offset:offset+len], msg)
-	logger.LogInit(false, zap.DebugLevel, "").Debugf("解析消息：code=%s - %v", seqType.String(), msg)
+	logger.SLCInfo("解析消息：code=%s - %v", seqType.String(), msg)
 	return
 }

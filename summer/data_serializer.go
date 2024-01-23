@@ -87,7 +87,7 @@ func Serialize(args []any) []byte {
 			buf.Write(bs)
 		default:
 			buf.WriteByte(0)
-			logger.SLCDebug("DataSerializer无法处理的类型:%v", reflect.TypeOf(arg))
+			logger.SLCError("DataSerializer无法处理的类型:%v", reflect.TypeOf(arg))
 		}
 	}
 	return buf.Bytes()
@@ -165,7 +165,7 @@ func Deserialize(data []byte) []any {
 			}
 			list = append(list, string(arr))
 		default:
-			logger.SLCDebug("DataSerializer无法识别的编码:%v", bt)
+			logger.SLCError("DataSerializer无法识别的编码:%v", bt)
 		}
 	}
 	return list
