@@ -17,17 +17,54 @@ option go_package = "./proto";
 //  entity = 2001;
 //}
 
-message Vector3 {
-  float x = 1;
-  float y = 2;
-  float z = 3;
+message NVector3 {
+  int32 x = 1;
+  int32 y = 2;
+  int32 z = 3;
 }
 
-message Entity {
+enum EntityState {
+    NONE = 0;
+    IDLE = 1;
+    MOVE = 2;
+    JUMP = 3;
+}
+
+message NEntity {
   int32 id = 1;
-  int32 speed = 2;
-  Vector3 position = 3;
-  Vector3 rotation = 4;
+  NVector3 position = 2;
+  NVector3 direction = 3;
+}
+
+message NEntitySync {
+    NEntity entity = 1;
+    EntityState state = 2;
+}
+
+message SpaceEntitySyncRequest {
+    NEntitySync entitySync = 1;
+}
+
+message SpaceEntitySyncResponse {
+    NEntitySync entitySync = 1;
+}
+
+message GameEnterRequest {
+    int32 characterId = 1;
+}
+
+message GameEnterResponse {
+    bool success = 1;
+    NEntity entity = 2;
+}
+
+message SpaceCharactersEnterResponse {
+    int32 spaceId = 1;
+    repeated NEntity entityList = 2;
+}
+
+message SpaceCharacterLeaveResponse {
+    int32 entityId = 1;
 }
 
 message Request {

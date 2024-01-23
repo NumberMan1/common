@@ -2,7 +2,7 @@ package core
 
 import (
 	"github.com/NumberMan1/common/logger"
-	"github.com/NumberMan1/common/summer/core"
+	"github.com/NumberMan1/common/ns"
 	"github.com/NumberMan1/common/summer/network"
 	"google.golang.org/protobuf/proto"
 	"net"
@@ -40,35 +40,35 @@ type TcpServer struct {
 	endAddr        *net.TCPAddr
 	serverListener *net.TCPListener //服务端监听对象
 	//客户端接入事件
-	socketConnected core.Event[TcpServerEventHandler]
+	socketConnected ns.Event[TcpServerEventHandler]
 	//事件委托：新的连接
-	connected core.Event[TcpServerConnectedCallback]
+	connected ns.Event[TcpServerConnectedCallback]
 	//事件委托：收到消息
-	dataReceived core.Event[TcpServerDataReceivedCallback]
+	dataReceived ns.Event[TcpServerDataReceivedCallback]
 	//事件委托：连接断开
-	disconnected core.Event[TcpServerDisconnectedCallback]
+	disconnected ns.Event[TcpServerDisconnectedCallback]
 	//可以排队接受的传入连接数
 	maxBacklog int
 	//当前的传入连接数
 	curBacklog  int
-	acceptEvent *core.AutoResetEvent
+	acceptEvent *ns.AutoResetEvent
 	chStop      chan struct{} // 用于发送停止信号
 }
 
 func (ts *TcpServer) SetSocketConnected(socketConnectedCB TcpServerEventHandler) {
-	ts.socketConnected.AddDelegate(core.NewDelegate(socketConnectedCB, "socketConnected"))
+	ts.socketConnected.AddDelegate(ns.NewDelegate(socketConnectedCB, "socketConnected"))
 }
 
 func (ts *TcpServer) SetConnectedCallback(connectedCallback TcpServerConnectedCallback) {
-	ts.connected.AddDelegate(core.NewDelegate(connectedCallback, "connectedCallback"))
+	ts.connected.AddDelegate(ns.NewDelegate(connectedCallback, "connectedCallback"))
 }
 
 func (ts *TcpServer) SetDataReceivedCallback(dataReceivedCallback TcpServerDataReceivedCallback) {
-	ts.dataReceived.AddDelegate(core.NewDelegate(dataReceivedCallback, "dataReceivedCallback"))
+	ts.dataReceived.AddDelegate(ns.NewDelegate(dataReceivedCallback, "dataReceivedCallback"))
 }
 
 func (ts *TcpServer) SetDisconnectedCallback(disconnectedCallback TcpServerDisconnectedCallback) {
-	ts.disconnected.AddDelegate(core.NewDelegate(disconnectedCallback, "disconnectedCallback"))
+	ts.disconnected.AddDelegate(ns.NewDelegate(disconnectedCallback, "disconnectedCallback"))
 }
 
 func NewTcpServer(address string) (*TcpServer, error) {
@@ -79,13 +79,13 @@ func NewTcpServer(address string) (*TcpServer, error) {
 	return &TcpServer{
 		endAddr:         addr,
 		serverListener:  nil,
-		socketConnected: core.Event[TcpServerEventHandler]{},
-		connected:       core.Event[TcpServerConnectedCallback]{},
-		dataReceived:    core.Event[TcpServerDataReceivedCallback]{},
-		disconnected:    core.Event[TcpServerDisconnectedCallback]{},
+		socketConnected: ns.Event[TcpServerEventHandler]{},
+		connected:       ns.Event[TcpServerConnectedCallback]{},
+		dataReceived:    ns.Event[TcpServerDataReceivedCallback]{},
+		disconnected:    ns.Event[TcpServerDisconnectedCallback]{},
 		maxBacklog:      100,
 		curBacklog:      0,
-		acceptEvent:     core.NewAutoResetEvent(),
+		acceptEvent:     ns.NewAutoResetEvent(),
 		chStop:          make(chan struct{}, 1),
 	}, nil
 }
@@ -106,6 +106,7 @@ func (ts *TcpServer) Start() {
 }
 
 func (ts *TcpServer) Stop() error {
+	ts.chStop <- struct{}{}
 	if ts.serverListener == nil {
 		return nil
 	}
@@ -115,22 +116,24 @@ func (ts *TcpServer) Stop() error {
 }
 
 func (ts *TcpServer) onAccept(socket *net.TCPConn, err error) {
-	select {
-	case <-ts.chStop:
-		return
-	default:
-		if err == nil {
-			if socket != nil {
-				ts.curBacklog += 1
-				ts.OnSocketConnected(socket)
-				ts.socketConnected.Invoke(ts, socket)
+	for {
+		select {
+		case <-ts.chStop:
+			return
+		default:
+			if err == nil {
+				if socket != nil {
+					ts.curBacklog += 1
+					ts.OnSocketConnected(socket)
+					ts.socketConnected.Invoke(ts, socket)
+				}
 			}
+			if ts.curBacklog > ts.maxBacklog {
+				ts.acceptEvent.Wait()
+			}
+			accept, err := ts.serverListener.AcceptTCP()
+			ts.onAccept(accept, err)
 		}
-		if ts.curBacklog < ts.maxBacklog {
-			ts.acceptEvent.Wait()
-		}
-		accept, err := ts.serverListener.AcceptTCP()
-		ts.onAccept(accept, err)
 	}
 }
 

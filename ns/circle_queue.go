@@ -1,4 +1,4 @@
-package core
+package ns
 
 type Queue struct {
 	data []any

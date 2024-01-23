@@ -1,8 +1,8 @@
 package main
 
 import (
+	service2 "github.com/NumberMan1/common/game_server/service"
 	n2 "github.com/NumberMan1/common/summer/network"
-	service2 "github.com/NumberMan1/common/summer/network/game_server/service"
 )
 
 func f(msg n2.Msg) bool {

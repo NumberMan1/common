@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"github.com/NumberMan1/common/logger"
-	"github.com/NumberMan1/common/summer/core"
+	"github.com/NumberMan1/common/ns"
 	"golang.org/x/exp/slices"
 	"io"
 	"reflect"
@@ -77,7 +77,7 @@ func Serialize(args []any) []byte {
 			}
 		case "string":
 			bs := []byte(arg.(string))
-			if core.IsLittleEndian() {
+			if ns.IsLittleEndian() {
 				slices.Reverse(bs)
 			}
 			arr := make([]byte, 4)
@@ -160,7 +160,7 @@ func Deserialize(data []byte) []any {
 			logger.SLCDebug("字符串长度:%v", l)
 			arr := make([]byte, l)
 			_, _ = buf.Read(arr)
-			if core.IsLittleEndian() {
+			if ns.IsLittleEndian() {
 				slices.Reverse(arr)
 			}
 			list = append(list, string(arr))

@@ -1,7 +1,8 @@
-package summer
+package test
 
 import (
 	"github.com/NumberMan1/common/logger"
+	"github.com/NumberMan1/common/summer"
 	"math"
 	"testing"
 )
@@ -33,15 +34,15 @@ func TestSerializeAndDeserialize(t *testing.T) {
 	anies = append(anies, "毛主席万岁!")
 	anies = append(anies, "秋水共长天一色")
 	//anies = append(anies, 34234234.532)
-	serialize := Serialize(anies)
+	serialize := summer.Serialize(anies)
 	logger.SLoggerConsole.Debug(serialize)
-	deserialize := Deserialize(serialize)
+	deserialize := summer.Deserialize(serialize)
 	logger.SLoggerConsole.Debug(deserialize)
 	for _, v := range deserialize {
 		logger.SLoggerConsole.Debugf("%v\n", v)
 	}
-	encode := VariantEncode(uint64(1000 * float64(123456.789)))
+	encode := summer.VariantEncode(uint64(1000 * float64(123456.789)))
 	logger.SLoggerConsole.Debug(encode)
-	decode := VariantDecode(encode)
+	decode := summer.VariantDecode(encode)
 	logger.SLoggerConsole.Debug(float64(decode))
 }

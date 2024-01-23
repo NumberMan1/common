@@ -3,7 +3,8 @@ package network
 import (
 	"encoding/binary"
 	"github.com/NumberMan1/common/logger"
-	"github.com/NumberMan1/common/summer/core"
+	"github.com/NumberMan1/common/ns"
+	core2 "github.com/NumberMan1/common/summer/core"
 	"github.com/NumberMan1/common/summer/proto_helper"
 	pt "github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"google.golang.org/protobuf/proto"
@@ -39,17 +40,17 @@ type Connection interface {
 	Close()
 	SocketSend(data []byte, offset, count int)
 	Send(p proto.Message)
-	SetDataReceivedCallback(dataReceivedCallback core.Func)
-	SetDisconnectedCallback(disconnectedCallback core.Func)
+	SetDataReceivedCallback(dataReceivedCallback ns.Func)
+	SetDisconnectedCallback(disconnectedCallback ns.Func)
 	//sendCallBack()
 }
 
 type connection struct {
 	socket net.Conn
 	// 接收到数据
-	dataReceivedCallback core.Event[ConnectionDataReceivedCallback]
+	dataReceivedCallback ns.Event[ConnectionDataReceivedCallback]
 	// 连接断开
-	disconnectedCallback core.Event[ConnectionDisconnectedCallback]
+	disconnectedCallback ns.Event[ConnectionDisconnectedCallback]
 	_package             *pt.Package
 	mutex                sync.Mutex
 }
@@ -59,20 +60,20 @@ func (c *connection) Socket() net.Conn {
 }
 
 // SetDataReceivedCallback Func应为DataReceivedCallback
-func (c *connection) SetDataReceivedCallback(dataReceivedCallback core.Func) {
-	c.dataReceivedCallback.AddDelegate(core.NewDelegate(dataReceivedCallback.(ConnectionDataReceivedCallback), "dataReceivedCallback"))
+func (c *connection) SetDataReceivedCallback(dataReceivedCallback ns.Func) {
+	c.dataReceivedCallback.AddDelegate(ns.NewDelegate(dataReceivedCallback.(ConnectionDataReceivedCallback), "dataReceivedCallback"))
 }
 
 // SetDisconnectedCallback Func应为DisconnectedCallback
-func (c *connection) SetDisconnectedCallback(disconnectedCallback core.Func) {
-	c.disconnectedCallback.AddDelegate(core.NewDelegate(disconnectedCallback.(ConnectionDisconnectedCallback), "disconnectedCallback"))
+func (c *connection) SetDisconnectedCallback(disconnectedCallback ns.Func) {
+	c.disconnectedCallback.AddDelegate(ns.NewDelegate(disconnectedCallback.(ConnectionDisconnectedCallback), "disconnectedCallback"))
 }
 
 func NewConnection(socket net.Conn) Connection {
 	c := &connection{
 		socket:               socket,
-		dataReceivedCallback: core.Event[ConnectionDataReceivedCallback]{},
-		disconnectedCallback: core.Event[ConnectionDisconnectedCallback]{},
+		dataReceivedCallback: ns.Event[ConnectionDataReceivedCallback]{},
+		disconnectedCallback: ns.Event[ConnectionDisconnectedCallback]{},
 		mutex:                sync.Mutex{},
 	}
 	lfd := NewSocketReceiver(socket)
@@ -104,13 +105,13 @@ func (c *connection) _received(data []byte) error {
 func (c *connection) Close() {
 	err := c.socket.Close()
 	if err != nil {
-		logger.SLCDebug("NetConnection Close %s", err.Error())
+		logger.SLCError("NetConnection Close %s", err.Error())
 		return
 	}
-	c.socket = nil
 	if c.disconnectedCallback.HasDelegate() {
 		c.disconnectedCallback.Invoke(c)
 	}
+	c.socket = nil
 }
 
 // SocketSend 前提是data必须是大端字节序
@@ -141,9 +142,9 @@ func (c *connection) SocketSend(data []byte, offset, count int) {
 }
 
 func (c *connection) Send(p proto.Message) {
-	stream := core.AllocateDataStream()
+	stream := core2.AllocateDataStream()
 	bs, _ := proto.Marshal(p)
-	if core.IsLittleEndian() {
+	if ns.IsLittleEndian() {
 		slices.Reverse(bs)
 	}
 	code := proto_helper.SeqCode(reflect.TypeOf(p))

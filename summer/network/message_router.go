@@ -2,7 +2,7 @@ package network
 
 import (
 	"github.com/NumberMan1/common/logger"
-	"github.com/NumberMan1/common/summer/core"
+	"github.com/NumberMan1/common/ns"
 	"google.golang.org/protobuf/proto"
 	"reflect"
 	"sync"
@@ -26,14 +26,14 @@ func (m MessageHandler) Operator(args ...any) {
 // MessageRouter 消息分发器
 // 都应通过GetMessageRouterInstance来获取对象
 type MessageRouter struct {
-	threadCount int                  //工作协程数
-	workerCount int                  //正在工作的协程数
-	Running     bool                 //是否正在运行状态
-	threadEvent *core.AutoResetEvent //通过Set每次可以唤醒1个线程
+	threadCount int                //工作协程数
+	workerCount int                //正在工作的协程数
+	Running     bool               //是否正在运行状态
+	threadEvent *ns.AutoResetEvent //通过Set每次可以唤醒1个线程
 	// 消息队列，所有客户端发来的消息都暂存在这里
-	messageQueue *core.TSQueue[Msg]
+	messageQueue *ns.TSQueue[Msg]
 	// 频道字典（订阅记录）
-	delegateMap map[string]core.Event[MessageHandler]
+	delegateMap map[string]ns.Event[MessageHandler]
 	mutex       sync.Mutex
 }
 
@@ -48,9 +48,9 @@ func GetMessageRouterInstance() *MessageRouter {
 			threadCount:  1,
 			workerCount:  0,
 			Running:      false,
-			threadEvent:  core.NewAutoResetEvent(),
-			messageQueue: core.NewTSQueue[Msg](),
-			delegateMap:  map[string]core.Event[MessageHandler]{},
+			threadEvent:  ns.NewAutoResetEvent(),
+			messageQueue: ns.NewTSQueue[Msg](),
+			delegateMap:  map[string]ns.Event[MessageHandler]{},
 			mutex:        sync.Mutex{},
 		}
 	})
@@ -61,10 +61,10 @@ func GetMessageRouterInstance() *MessageRouter {
 func (mr *MessageRouter) Subscribe(name string, handler MessageHandler) {
 	_, ok := mr.delegateMap[name]
 	if !ok {
-		mr.delegateMap[name] = core.Event[MessageHandler]{}
+		mr.delegateMap[name] = ns.Event[MessageHandler]{}
 	}
 	d := mr.delegateMap[name]
-	d.AddDelegate(core.NewDelegate(handler, reflect.ValueOf(handler.Op).String()))
+	d.AddDelegate(ns.NewDelegate(handler, reflect.ValueOf(handler.Op).String()))
 	mr.delegateMap[name] = d
 	logger.SLCDebug("Subscribe:%v", name)
 }
@@ -73,7 +73,7 @@ func (mr *MessageRouter) Subscribe(name string, handler MessageHandler) {
 func (mr *MessageRouter) Off(name string, handler MessageHandler) {
 	_, ok := mr.delegateMap[name]
 	if !ok {
-		mr.delegateMap[name] = core.Event[MessageHandler]{}
+		mr.delegateMap[name] = ns.Event[MessageHandler]{}
 	}
 	d := mr.delegateMap[name]
 	d.RemoveDelegates(reflect.ValueOf(handler.Op).String())

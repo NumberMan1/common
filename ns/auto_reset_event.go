@@ -1,4 +1,4 @@
-package core
+package ns
 
 // AutoResetEvent 用于线程同步
 type AutoResetEvent struct {
