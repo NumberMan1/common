@@ -131,8 +131,7 @@ func (ts *TcpServer) onAccept(socket *net.TCPConn, err error) {
 			if ts.curBacklog > ts.maxBacklog {
 				ts.acceptEvent.Wait()
 			}
-			accept, err := ts.serverListener.AcceptTCP()
-			ts.onAccept(accept, err)
+			socket, err = ts.serverListener.AcceptTCP()
 		}
 	}
 }
