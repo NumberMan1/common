@@ -148,9 +148,9 @@ func (c *connection) Send(p proto.Message) {
 	stream := core.AllocateDataStream()
 	bs, _ := proto.Marshal(p) // 不需要因为大小端反转
 	code := proto_helper.SeqCode(reflect.TypeOf(p))
-	stream.WriteInt32(int32(len(bs) + 2))
-	stream.WriteUInt16(uint16(code))
-	stream.Write(bs)
+	_ = stream.WriteInt32(int32(len(bs) + 2))
+	_ = stream.WriteUInt16(uint16(code))
+	_, _ = stream.Write(bs)
 	result := stream.Bytes()
 	//fmt.Println(result)
 	c.SocketSend(result, 0, len(result))
