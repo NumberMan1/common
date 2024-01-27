@@ -12,9 +12,9 @@ type DataStream struct {
 
 var DataStreamPool = make(chan *DataStream, 200)
 
-func newDataStream(size int) *DataStream {
+func newDataStream() *DataStream {
 	return &DataStream{
-		Buffer:         bytes.NewBuffer(make([]byte, size)),
+		Buffer:         bytes.NewBuffer(make([]byte, 0)),
 		isLittleEndian: false, // 统一使用大端模式
 	}
 }
@@ -25,7 +25,7 @@ func AllocateDataStream() *DataStream {
 	case stream := <-DataStreamPool:
 		return stream
 	default:
-		return newDataStream(1024)
+		return newDataStream()
 	}
 }
 

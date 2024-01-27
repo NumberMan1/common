@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/NumberMan1/common/game_server/model"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/summer/network"
 	"github.com/NumberMan1/common/summer/network/core"
@@ -30,4 +31,9 @@ func OnClientConnected(conn network.Connection) {
 
 func OnDisconnected(conn network.Connection) {
 	logger.SLCInfo("连接断开:%v", conn.Socket().RemoteAddr().String())
+	space := conn.Get("Space")
+	if space != nil {
+		co := conn.Get("Character").(*model.Character)
+		space.(*model.Space).CharacterLeave(conn, co)
+	}
 }

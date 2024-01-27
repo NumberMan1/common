@@ -3,6 +3,7 @@ package network
 import (
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
+	"github.com/NumberMan1/common/ns/singleton"
 	"google.golang.org/protobuf/proto"
 	"reflect"
 	"sync"
@@ -38,13 +39,12 @@ type MessageRouter struct {
 }
 
 var (
-	instance *MessageRouter
-	once     sync.Once
+	singleMessageRouter = singleton.Singleton{}
 )
 
 func GetMessageRouterInstance() *MessageRouter {
-	once.Do(func() {
-		instance = &MessageRouter{
+	instance, _ := singleton.GetOrDo[*MessageRouter](&singleMessageRouter, func() (*MessageRouter, error) {
+		return &MessageRouter{
 			threadCount:  1,
 			workerCount:  0,
 			Running:      false,
@@ -52,7 +52,7 @@ func GetMessageRouterInstance() *MessageRouter {
 			messageQueue: ns.NewTSQueue[Msg](),
 			delegateMap:  map[string]ns.Event[MessageHandler]{},
 			mutex:        sync.Mutex{},
-		}
+		}, nil
 	})
 	return instance
 }

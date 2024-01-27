@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"fmt"
 	"github.com/NumberMan1/common/logger"
 	"net"
 	"time"
@@ -47,7 +46,7 @@ func (s *SocketReceiver) beginReceive(ctx context.Context, cancelFunc context.Ca
 					cancelFunc()
 					continue
 				}
-				n, err := s.mSocket.Read(s.buf[s.startIndex:len(s.buf)])
+				n, err := s.mSocket.Read(s.buf[s.startIndex:])
 				s.receiveCB(cancelFunc, n, err)
 			}
 		}
@@ -74,7 +73,6 @@ func (s *SocketReceiver) doReceive(l int) {
 		data := make([]byte, msgLen)
 		copy(data, s.buf[offset+4:int(msgLen)+offset+4])
 		if s.DataReceived != nil {
-			fmt.Println(data)
 			err := s.DataReceived(data)
 			if err != nil {
 				logger.SLCError("SocketReceiver消息解析异常: %v\n", err.Error())

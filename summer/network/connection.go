@@ -4,13 +4,12 @@ import (
 	"encoding/binary"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
-	core2 "github.com/NumberMan1/common/summer/core"
+	"github.com/NumberMan1/common/summer/core"
 	"github.com/NumberMan1/common/summer/proto_helper"
 	pt "github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"google.golang.org/protobuf/proto"
 	"net"
 	"reflect"
-	"slices"
 	"sync"
 	"time"
 )
@@ -34,8 +33,10 @@ func (d ConnectionDisconnectedCallback) Operator(args ...any) {
 }
 
 // Connection 通用网络连接，可以继承此类实现功能拓展
-// 职责：发送消息，关闭连接，断开回调，接收消息回调，
+// 职责：发送消息，关闭连接，断开回调，接收消息回调
 type Connection interface {
+	Set(key string, value any)
+	Get(key string) any
 	Socket() net.Conn
 	Close()
 	SocketSend(data []byte, offset, count int)
@@ -46,6 +47,7 @@ type Connection interface {
 }
 
 type connection struct {
+	*core.TypeAttributeStore
 	socket net.Conn
 	// 接收到数据
 	dataReceivedCallback ns.Event[ConnectionDataReceivedCallback]
@@ -71,6 +73,7 @@ func (c *connection) SetDisconnectedCallback(disconnectedCallback ns.Func) {
 
 func NewConnection(socket net.Conn) Connection {
 	c := &connection{
+		TypeAttributeStore:   core.NewTypeAttributeStore(),
 		socket:               socket,
 		dataReceivedCallback: ns.Event[ConnectionDataReceivedCallback]{},
 		disconnectedCallback: ns.Event[ConnectionDisconnectedCallback]{},
@@ -142,16 +145,15 @@ func (c *connection) SocketSend(data []byte, offset, count int) {
 }
 
 func (c *connection) Send(p proto.Message) {
-	stream := core2.AllocateDataStream()
-	bs, _ := proto.Marshal(p)
-	if ns.IsLittleEndian() {
-		slices.Reverse(bs)
-	}
+	stream := core.AllocateDataStream()
+	bs, _ := proto.Marshal(p) // 不需要因为大小端反转
 	code := proto_helper.SeqCode(reflect.TypeOf(p))
 	stream.WriteInt32(int32(len(bs) + 2))
 	stream.WriteUInt16(uint16(code))
 	stream.Write(bs)
-	c.SocketSend(bs, 0, len(bs))
+	result := stream.Bytes()
+	//fmt.Println(result)
+	c.SocketSend(result, 0, len(result))
 	//buf := core.NewByteBufferByCapacity(false, 4+len(bs))
 	//buf.WriteInt32(int32(len(bs)))
 	//buf.WriteBytes(bs, 0, len(bs))

@@ -3,19 +3,13 @@ syntax = "proto3";
 package proto;
 option go_package = "./proto";
 
-//enum PackageID {
-//  package = 0;
-//  request = 1;
-//  response = 2;
-//
-//  userRegisterRequest = 500;
-//  userRegisterResponse = 501;
-//  userLoginRequest = 502;
-//  userLoginResponse = 503;
-//
-//  vector3 = 2000;
-//  entity = 2001;
-//}
+message HeartBeatRequest {
+
+}
+
+message HeartBeatResponse {
+
+}
 
 message NVector3 {
   int32 x = 1;
