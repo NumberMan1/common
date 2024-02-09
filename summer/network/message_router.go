@@ -31,10 +31,12 @@ type MessageRouter struct {
 	workerCount int                //正在工作的协程数
 	Running     bool               //是否正在运行状态
 	threadEvent *ns.AutoResetEvent //通过Set每次可以唤醒1个线程
+	con         sync.Cond
 	// 消息队列，所有客户端发来的消息都暂存在这里
 	messageQueue *ns.TSQueue[Msg]
 	// 频道字典（订阅记录）
 	delegateMap map[string]ns.Event[MessageHandler]
+	waitGroup   sync.WaitGroup
 	mutex       sync.Mutex
 }
 
@@ -51,6 +53,7 @@ func GetMessageRouterInstance() *MessageRouter {
 			threadEvent:  ns.NewAutoResetEvent(),
 			messageQueue: ns.NewTSQueue[Msg](),
 			delegateMap:  map[string]ns.Event[MessageHandler]{},
+			waitGroup:    sync.WaitGroup{},
 			mutex:        sync.Mutex{},
 		}, nil
 	})
@@ -86,9 +89,9 @@ func (mr *MessageRouter) fire(msg Msg) {
 	d, ok := mr.delegateMap[name]
 	if ok {
 		defer func() {
-			if err := recover(); err != nil {
-				logger.SLCError("MessageRouter fire error %v\n", err)
-			}
+			//if err := recover(); err != nil {
+			//	logger.SLCError("MessageRouter fire error %v", err)
+			//}
 		}()
 		if d.HasDelegate() {
 			d.Invoke(msg)
@@ -109,7 +112,11 @@ func (mr *MessageRouter) Start(threadCount int) {
 	mr.Running = true
 	mr.threadCount = min(max(threadCount, 1), 200)
 	for i := 0; i < mr.threadCount; i += 1 {
-		go mr.messageWork()
+		go func(i int) {
+			mr.waitGroup.Add(i)
+			mr.messageWork()
+			mr.waitGroup.Done()
+		}(i)
 	}
 	for mr.workerCount < mr.threadCount {
 		time.Sleep(100 * time.Millisecond)
@@ -122,15 +129,16 @@ func (mr *MessageRouter) Stop() {
 	for mr.workerCount > 0 {
 		mr.threadEvent.Set()
 	}
+	mr.waitGroup.Wait()
 	time.Sleep(100 * time.Millisecond)
 }
 
 func (mr *MessageRouter) messageWork() {
 	logger.SLCInfo("worker thread start")
 	defer func() {
-		if err := recover(); err != nil {
-			logger.SLCError("MessageRouter fire error %v\n", err)
-		}
+		//if err := recover(); err != nil {
+		//	logger.SLCError("MessageRouter messageWork error %v", err)
+		//}
 		a := atomic.Int32{}
 		a.Store(int32(mr.workerCount))
 		mr.workerCount = int(a.Add(-1))

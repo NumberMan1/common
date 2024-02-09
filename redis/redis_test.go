@@ -12,7 +12,7 @@ func TestRedisClusterClient(t *testing.T) {
 	//c := NewClusterClient(conf)
 	conf := &Config{Addrs: []string{":12000"}}
 	c := NewNormalClient(conf)
-	//statusCmd := c.ClusterClient.Set(context.Background(), "hello", "world", time.Second*1000)
+	//statusCmd := c.ClusterClient.Set(context.Background(), "hello", "world", timeunit.Second*1000)
 	statusCmd := c.Client.Set(context.Background(), "hello", "world", time.Second*1000)
 	fmt.Println(statusCmd)
 }

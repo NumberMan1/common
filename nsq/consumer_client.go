@@ -54,7 +54,7 @@ func NewConsumerClient(conf ConsumerConfig, cb func(c *nsq.Config)) *ConsumerCli
 	config := nsq.NewConfig()
 	config.LocalAddr, _ = net.ResolveTCPAddr("tcp", conf.Address+":0")
 	//config.DefaultRequeueDelay = 0
-	//config.MaxBackoffDuration = time.Millisecond * 50
+	//config.MaxBackoffDuration = timeunit.Millisecond * 50
 	if cb != nil {
 		cb(config)
 	}

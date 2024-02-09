@@ -96,7 +96,7 @@ func (ts *TcpServer) IsRunning() bool {
 
 func (ts *TcpServer) Start() {
 	if !ts.IsRunning() {
-		logger.SLCDebug("start listen %v\n", ts.endAddr.String())
+		logger.SLCDebug("start listen %v", ts.endAddr.String())
 		ts.serverListener, _ = net.ListenTCP("tcp4", ts.endAddr)
 		go func() {
 			accept, err := ts.serverListener.AcceptTCP()

@@ -51,7 +51,7 @@ type PublishData struct {
 
 func NewProducerClient(addr string) *ProducerClient {
 	config := nsq.NewConfig()
-	//config.HeartbeatInterval = 100 * time.Millisecond
+	//config.HeartbeatInterval = 100 * timeunit.Millisecond
 	w, _ := nsq.NewProducer(addr, config)
 	w.SetLogger(log.Default(), nsq.LogLevelInfo)
 	return &ProducerClient{

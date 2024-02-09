@@ -1,9 +1,11 @@
 package service
 
-// Session 用户会话类，主要负责存储用户信息，给客户端发送响应
+import "github.com/NumberMan1/common/game_server/model"
+
+// Session 用户会话类
 type Session struct {
-}
-
-func (s *Session) SendBytes(buffer []byte, start, length int) {
-
+	// 当前登录的角色
+	Character *model.Character
+	// 当前所在地图
+	Space *model.Space
 }

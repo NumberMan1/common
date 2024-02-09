@@ -38,7 +38,7 @@ func init() {
 	})
 	for i, fullName := range list {
 		t := registry[fullName]
-		logger.SLCDebug("Proto类型注册：%d - %s", i, fullName)
+		logger.SLCDebug("Proto类型注册：%d - %v", i, fullName)
 		dict1[i] = t
 		dict2[t] = i
 	}
@@ -73,6 +73,6 @@ func ParseFrom(typeCode int, data []byte, offset, len int) (msg proto.Message, e
 	}
 	msg = pbType.New().Interface()
 	err = proto.Unmarshal(data[offset:offset+len], msg)
-	logger.SLCInfo("解析消息：code=%s - %v", seqType.String(), msg)
+	logger.SLCInfo("解析消息：code=%s : %v", seqType.String(), msg)
 	return
 }

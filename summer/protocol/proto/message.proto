@@ -3,90 +3,128 @@ syntax = "proto3";
 package proto;
 option go_package = "./proto";
 
-message HeartBeatRequest {
-
+message HeartBeatRequest{
+}
+message HeartBeatResponse{
 }
 
-message HeartBeatResponse {
-
-}
 
 message NVector3 {
-  int32 x = 1;
-  int32 y = 2;
-  int32 z = 3;
+	int32 x = 1;
+	int32 y = 2;
+	int32 z = 3;
 }
-
+// 实体状态
 enum EntityState {
-    NONE = 0;
-    IDLE = 1;
-    MOVE = 2;
-    JUMP = 3;
+	NONE = 0;
+	IDLE = 1;
+	MOVE = 2;
+	JUMP = 3;
 }
-
+// 实体信息
 message NEntity {
-  int32 id = 1;
-  NVector3 position = 2;
-  NVector3 direction = 3;
+	int32 id = 1;
+	NVector3 position = 2;
+	NVector3 direction = 3;
+	int32 speed = 4;
+}
+// 角色信息
+message NCharacter{
+    int32 id = 1;
+    int32 type_id = 2; //角色类型
+    int32 entity_id = 3;
+    string name = 4;
+    int32 level = 5;
+    int64 exp = 6;
+    int32 spaceId = 7;
+    int64 gold = 8;
+    NEntity entity = 9;
+	int32 hp = 10;
+	int32 mp = 11;
 }
 
-message NEntitySync {
-    NEntity entity = 1;
-    EntityState state = 2;
+message NEntitySync{
+	NEntity entity = 1;
+	EntityState state = 2;
+	bool force = 3;
 }
 
-message SpaceEntitySyncRequest {
-    NEntitySync entitySync = 1;
+message SpaceEntitySyncRequest{
+	NEntitySync entitySync = 1;
+}
+message SpaceEntitySyncResponse{
+	NEntitySync entitySync = 1;
 }
 
-message SpaceEntitySyncResponse {
-    NEntitySync entitySync = 1;
+message GameEnterRequest{
+	int32 characterId = 1;
+}
+//加入游戏的响应
+message GameEnterResponse{
+	bool success = 1;
+	NEntity entity = 2;
+	NCharacter character = 3;
 }
 
-message GameEnterRequest {
-    int32 characterId = 1;
+message SpaceCharactersEnterResponse{
+	int32 spaceId = 1;
+	repeated NCharacter characterList = 2;
 }
 
-message GameEnterResponse {
+message SpaceCharacterLeaveResponse{
+	int32 entityId = 1;
+}
+
+
+message UserRegisterRequest{
+	string username = 1;
+	string password = 2;
+}
+message UserRegisterResponse{
+	int32 code = 1;
+	string message = 2;
+}
+message UserLoginRequest{
+	string username = 1;
+	string password = 2;
+}
+message UserLoginResponse{
+	bool success = 3;
+	int32 code = 1;
+	string message = 2;
+}
+message EntitySyncResponse {
+	repeated NEntity entityList = 1;
+}
+message EntityEnterResponse {
+	NEntity entity = 1;
+}
+
+message CharacterCreateRequest{
+	string name = 1;
+	int32 jobType = 2;
+}
+
+// 创建角色的响应
+message ChracterCreateResponse{
     bool success = 1;
-    NEntity entity = 2;
+    string message = 2;
+    NCharacter character = 3;
 }
 
-message SpaceCharactersEnterResponse {
-    int32 spaceId = 1;
-    repeated NEntity entityList = 2;
+// 查询角色列表的请求
+message CharacterListRequest{
 }
-
-message SpaceCharacterLeaveResponse {
-    int32 entityId = 1;
+// 角色列表的响应
+message CharacterListResponse{
+	repeated NCharacter characterList = 1;
 }
-
-message Request {
-  UserRegisterRequest userRegister = 1;
-  UserLoginRequest UserLogin = 2;
+// 删除角色的请求
+message CharacterDeleteRequest{
+	int32 characterId = 1;
 }
-
-message Response {
-  UserRegisterResponse userRegister = 1;
-  UserLoginResponse userLogin = 2;
-}
-
-message UserRegisterRequest {
-  string username = 1;
-  string password = 2;
-}
-
-message UserRegisterResponse {
-  int32 code = 1;
-  string message = 2;
-}
-
-message UserLoginRequest {
-  string username = 1;
-  string password = 2;
-}
-
-message UserLoginResponse {
-  int32 code = 1;
-  string message = 2;
+// 删除角色的响应
+message CharacterDeleteResponse{
+	bool success = 1;
+	string message = 2;
 }

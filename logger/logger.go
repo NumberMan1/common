@@ -16,7 +16,7 @@ func init() {
 
 func SLCDebug(format string, args ...any) {
 	if len(args) > 0 {
-		SLoggerConsole.Debug(fmt.Sprintf(format, args))
+		SLoggerConsole.Debug(fmt.Sprintf(format, args...))
 	} else {
 		SLoggerConsole.Debug(format)
 	}
@@ -24,7 +24,7 @@ func SLCDebug(format string, args ...any) {
 
 func SLCInfo(format string, args ...any) {
 	if len(args) > 0 {
-		SLoggerConsole.Info(fmt.Sprintf(format, args))
+		SLoggerConsole.Info(fmt.Sprintf(format, args...))
 	} else {
 		SLoggerConsole.Info(format)
 	}
@@ -32,7 +32,7 @@ func SLCInfo(format string, args ...any) {
 
 func SLCWarn(format string, args ...any) {
 	if len(args) > 0 {
-		SLoggerConsole.Warn(fmt.Sprintf(format, args))
+		SLoggerConsole.Warn(fmt.Sprintf(format, args...))
 	} else {
 		SLoggerConsole.Warn(format)
 	}
@@ -40,7 +40,7 @@ func SLCWarn(format string, args ...any) {
 
 func SLCError(format string, args ...any) {
 	if len(args) > 0 {
-		SLoggerConsole.Error(fmt.Sprintf(format, args))
+		SLoggerConsole.Error(fmt.Sprintf(format, args...))
 	} else {
 		SLoggerConsole.Error(format)
 	}
@@ -48,7 +48,7 @@ func SLCError(format string, args ...any) {
 
 func SLCFatal(format string, args ...any) {
 	if len(args) > 0 {
-		SLoggerConsole.Fatal(fmt.Sprintf(format, args))
+		SLoggerConsole.Fatal(fmt.Sprintf(format, args...))
 	} else {
 		SLoggerConsole.Fatal(format)
 	}
@@ -56,7 +56,7 @@ func SLCFatal(format string, args ...any) {
 
 func SLCPanic(format string, args ...any) {
 	if len(args) > 0 {
-		SLoggerConsole.Panic(fmt.Sprintf(format, args))
+		SLoggerConsole.Panic(fmt.Sprintf(format, args...))
 	} else {
 		SLoggerConsole.Panic(format)
 	}
@@ -140,7 +140,7 @@ func LogInit(isJson bool, level zapcore.Level, filePath string) *zap.SugaredLogg
 //}
 //
 //func (s *Logger) getLogWriter() zapcore.WriteSyncer {
-//	file, _ := os.OpenFile(s.path+time.Now().Format("2006-01-02")+".log", os.O_APPEND|os.O_WRONLY, 0644)
+//	file, _ := os.OpenFile(s.path+timeunit.Now().Format("2006-01-02")+".log", os.O_APPEND|os.O_WRONLY, 0644)
 //	return zapcore.AddSync(file)
 //}
 //func (s *Logger) SugarError(format string, a ...any) {
