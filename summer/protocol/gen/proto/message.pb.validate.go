@@ -526,7 +526,7 @@ func (m *NCharacter) validate(all bool) error {
 
 	// no validation rules for Id
 
-	// no validation rules for TypeId
+	// no validation rules for Tid
 
 	// no validation rules for EntityId
 
@@ -572,6 +572,8 @@ func (m *NCharacter) validate(all bool) error {
 	// no validation rules for Hp
 
 	// no validation rules for Mp
+
+	// no validation rules for Type
 
 	if len(errors) > 0 {
 		return NCharacterMultiError(errors)
@@ -649,6 +651,109 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = NCharacterValidationError{}
+
+// Validate checks the field values on SkillInfo with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *SkillInfo) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SkillInfo with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in SkillInfoMultiError, or nil
+// if none found.
+func (m *SkillInfo) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SkillInfo) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Code
+
+	// no validation rules for Level
+
+	if len(errors) > 0 {
+		return SkillInfoMultiError(errors)
+	}
+
+	return nil
+}
+
+// SkillInfoMultiError is an error wrapping multiple validation errors returned
+// by SkillInfo.ValidateAll() if the designated constraints aren't met.
+type SkillInfoMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SkillInfoMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SkillInfoMultiError) AllErrors() []error { return m }
+
+// SkillInfoValidationError is the validation error returned by
+// SkillInfo.Validate if the designated constraints aren't met.
+type SkillInfoValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SkillInfoValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SkillInfoValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SkillInfoValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SkillInfoValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SkillInfoValidationError) ErrorName() string { return "SkillInfoValidationError" }
+
+// Error satisfies the builtin error interface
+func (e SkillInfoValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSkillInfo.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SkillInfoValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SkillInfoValidationError{}
 
 // Validate checks the field values on NEntitySync with the rules defined in
 // the proto definition for this message. If any rules are violated, the first

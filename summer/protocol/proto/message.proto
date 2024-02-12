@@ -8,6 +8,13 @@ message HeartBeatRequest{
 message HeartBeatResponse{
 }
 
+enum EntityType
+{
+	Character = 0;
+	Monster = 1;
+	NPC = 2;
+}
+
 
 message NVector3 {
 	int32 x = 1;
@@ -31,7 +38,7 @@ message NEntity {
 // 角色信息
 message NCharacter{
     int32 id = 1;
-    int32 type_id = 2; //角色类型
+    int32 tid = 2; //单位类型=职业=TID
     int32 entity_id = 3;
     string name = 4;
     int32 level = 5;
@@ -41,7 +48,15 @@ message NCharacter{
     NEntity entity = 9;
 	int32 hp = 10;
 	int32 mp = 11;
+	EntityType type = 12;
 }
+
+// 技能信息
+message SkillInfo{
+	int32 code = 1; 	//技能编码
+	int32 level = 2;	//技能等级
+}
+
 
 message NEntitySync{
 	NEntity entity = 1;
@@ -84,6 +99,8 @@ message UserRegisterResponse{
 	int32 code = 1;
 	string message = 2;
 }
+
+
 message UserLoginRequest{
 	string username = 1;
 	string password = 2;
