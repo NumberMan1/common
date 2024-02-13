@@ -102,7 +102,7 @@ func (s *Schedule) run(ctx context.Context) {
 	s.runLoop(ctx)
 }
 
-func (s *Schedule) AddTask(action func(), timeUnit, timeValue, repeatCount int) {
+func (s *Schedule) AddTask(action func(), timeUnit timeunit.TimeUnit, timeValue, repeatCount int) {
 	interval, err := timeunit.GetInterval(timeValue, timeUnit)
 	if err != nil {
 		logger.SLCError("Schedule Failed to AddTask: %s", err.Error())

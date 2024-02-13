@@ -5,8 +5,10 @@ import (
 	"time"
 )
 
+type TimeUnit int
+
 const (
-	Milliseconds = iota
+	Milliseconds TimeUnit = iota
 	Seconds
 	Minutes
 	Hours
@@ -14,16 +16,20 @@ const (
 )
 
 var (
+	StartTime int64
+	Time      float64
 	DeltaTime float64
 	LastTick  int64
 )
 
 func init() {
+	StartTime = time.Now().UnixMilli()
+	Time = 0
 	DeltaTime = 0
 	LastTick = 0
 }
 
-func GetInterval(timeValue, timeUint int) (int64, error) {
+func GetInterval(timeValue int, timeUint TimeUnit) (int64, error) {
 	switch timeUint {
 	case Milliseconds:
 		return int64(timeValue), nil
@@ -43,9 +49,10 @@ func GetInterval(timeValue, timeUint int) (int64, error) {
 // Tick 由 summer/schedule调用，请不要自行调用，除非你知道自己在做什么！！！
 func Tick() {
 	now := time.Now().UnixMilli()
+	Time = float64(now-StartTime) * 0.001
 	if LastTick == 0 {
 		LastTick = now
 	}
-	DeltaTime = float64(now-LastTick) / 1000.0
+	DeltaTime = float64(now-LastTick) * 0.001
 	LastTick = now
 }
