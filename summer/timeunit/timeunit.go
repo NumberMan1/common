@@ -16,10 +16,14 @@ const (
 )
 
 var (
+	// StartTime 游戏开始的时间戳
 	StartTime int64
-	Time      float64
+	// Time 游戏的运行时间（秒）
+	Time float64
+	// DeltaTime 获取上一帧运行所用的时间（秒）
 	DeltaTime float64
-	LastTick  int64
+	// LastTick 记录最后一次tick的时间
+	LastTick int64
 )
 
 func init() {
