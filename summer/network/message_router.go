@@ -89,9 +89,9 @@ func (mr *MessageRouter) fire(msg Msg) {
 	d, ok := mr.delegateMap[name]
 	if ok {
 		defer func() {
-			//if err := recover(); err != nil {
-			//	logger.SLCError("MessageRouter fire error %v", err)
-			//}
+			if err := recover(); err != nil {
+				logger.SLCError("MessageRouter fire error %v", err)
+			}
 		}()
 		if d.HasDelegate() {
 			d.Invoke(msg)
@@ -136,9 +136,9 @@ func (mr *MessageRouter) Stop() {
 func (mr *MessageRouter) messageWork() {
 	logger.SLCInfo("worker thread start")
 	defer func() {
-		//if err := recover(); err != nil {
-		//	logger.SLCError("MessageRouter messageWork error %v", err)
-		//}
+		if err := recover(); err != nil {
+			logger.SLCError("MessageRouter messageWork error %v", err)
+		}
 		a := atomic.Int32{}
 		a.Store(int32(mr.workerCount))
 		mr.workerCount = int(a.Add(-1))

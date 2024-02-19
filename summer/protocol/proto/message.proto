@@ -15,8 +15,8 @@ enum EntityType
 	NPC = 2;
 }
 
-
-message NVector3 {
+// 用于网络传输的三维向量
+message Vec3 {
 	int32 x = 1;
 	int32 y = 2;
 	int32 z = 3;
@@ -28,47 +28,165 @@ enum EntityState {
 	MOVE = 2;
 	JUMP = 3;
 }
+
+enum UnitState{
+	FREE	= 0;
+	DEAD	= 1;
+	REST	= 2;
+	FIGHT	= 3;
+	MAX		= 4;
+}
+
 // 实体信息
-message NEntity {
+message NetEntity {
 	int32 id = 1;
-	NVector3 position = 2;
-	NVector3 direction = 3;
+	Vec3 position = 2;
+	Vec3 direction = 3;
 	int32 speed = 4;
 }
 // 角色信息
-message NCharacter{
+message NetActor{
     int32 id = 1;
     int32 tid = 2; //单位类型=职业=TID
-    int32 entity_id = 3;
     string name = 4;
     int32 level = 5;
     int64 exp = 6;
     int32 spaceId = 7;
     int64 gold = 8;
-    NEntity entity = 9;
-	int32 hp = 10;
-	int32 mp = 11;
+    NetEntity entity = 9;
+	float hp = 10;
+	float mp = 11;
 	EntityType type = 12;
+	repeated SkillInfo Skills = 13;
 }
+
+
+message PropertyUpdate {
+	enum Prop {
+	  HP = 0;
+	  MP = 1;
+	  HPMax = 2;
+	  MPMax = 3;
+	  State = 4;
+	  Level = 5;
+	  Name = 6;
+	}
+  
+	message PropertyValue {
+	  oneof value {
+		int32 int_value = 1;
+		float float_value = 2;
+		string string_value = 3;
+		UnitState state_value = 4;
+	  }
+	}
+  
+	int32 entity_id = 1;
+	Prop property = 2;
+	PropertyValue oldValue = 3;
+	PropertyValue newValue = 4;
+}
+message PropertyUpdateResponse{
+	repeated PropertyUpdate list = 1;
+}
+
+
+
+//伤害类型
+enum DamageType {
+	UNKNOWN = 0; 	// 默认值，表示未知或未设置
+	PHYSICAL = 1; 	// 物理伤害
+	MAGICAL = 2; 	// 魔法伤害
+	REAL = 3; 		// 真实伤害，通常不受任何防御属性影响
+}
+//伤害数据
+message Damage{
+	int32 attackerId = 1;		// 攻击者
+	int32 targetId = 2;			// 被攻击者
+	int32 skillId = 3;			// 技能
+	float amount = 4;			// 伤害数值
+	DamageType damageType = 5;	// 伤害类型
+	bool isCrit = 6;			// 是否暴击
+	bool isMiss = 7; 			// 是否miss
+}
+//通知客户端有人受到伤害
+message DamageResponse{
+	repeated Damage list = 1;
+}
+
+
+//聊天请求
+message ChatRequest{
+	string text_value = 1;		//消息文本
+}
+//聊天响应
+message ChatResponse {
+	int32 sender_id = 1;		//发送者entityID
+	string text_value = 2;		//消息文本
+}
+
 
 // 技能信息
 message SkillInfo{
-	int32 code = 1; 	//技能编码
-	int32 level = 2;	//技能等级
+	int32 id = 1; 	//技能ID
+}
+//施法信息
+message CastInfo{
+	int32 casterId = 1; 	//施法者id
+	int32 skillId = 2;		//技能id
+	int32 targetId = 3;		//技能施放单位
+	Vec3 targetLoc = 4;		//技能施放点
+}
+//施放请求
+message SpellRequest{
+	CastInfo info = 1;
+}
+//技能施放结果
+enum CastResult{
+	Success			= 0;		//成功
+	IsPassive   	= 1;		//被动技能
+	MpLack 			= 2;		//MP不足
+	EntityDead 		= 3;  		//Entity已经死亡
+	OutOfRange 		= 5;     	//超出范围
+	Running 		= 6;        //进行中
+	Cooldown 		= 7;      	//冷却中
+	TargetError		= 8;		//目标错误
+}
+//技能施放错误（只有施法玩家才会收到）
+message SpellFailResponse{
+	int32 casterId = 1; 		//施法者id
+	int32 skillId = 2;			//技能id
+	CastResult reason = 3;  	//失败原因
+}
+//通知客户端执行技能
+message SpellResponse{
+	repeated CastInfo castList = 1;
+}
+
+//请求复活
+message ReviveRequest{
+	int32 entityId = 1;
+}
+
+//角色进入场景
+message SpaceEnterResponse{
+	NetActor character = 1;
+	repeated NetActor list = 2; 
 }
 
 
-message NEntitySync{
-	NEntity entity = 1;
+
+message NetEntitySync{
+	NetEntity entity = 1;
 	EntityState state = 2;
 	bool force = 3;
 }
 
 message SpaceEntitySyncRequest{
-	NEntitySync entitySync = 1;
+	NetEntitySync entitySync = 1;
 }
 message SpaceEntitySyncResponse{
-	NEntitySync entitySync = 1;
+	NetEntitySync entitySync = 1;
 }
 
 message GameEnterRequest{
@@ -77,13 +195,13 @@ message GameEnterRequest{
 //加入游戏的响应
 message GameEnterResponse{
 	bool success = 1;
-	NEntity entity = 2;
-	NCharacter character = 3;
+	NetEntity entity = 2;
+	NetActor character = 3;
 }
 
 message SpaceCharactersEnterResponse{
 	int32 spaceId = 1;
-	repeated NCharacter characterList = 2;
+	repeated NetActor characterList = 2;
 }
 
 message SpaceCharacterLeaveResponse{
@@ -111,10 +229,10 @@ message UserLoginResponse{
 	string message = 2;
 }
 message EntitySyncResponse {
-	repeated NEntity entityList = 1;
+	repeated NetEntity entityList = 1;
 }
 message EntityEnterResponse {
-	NEntity entity = 1;
+	NetEntity entity = 1;
 }
 
 message CharacterCreateRequest{
@@ -126,7 +244,7 @@ message CharacterCreateRequest{
 message ChracterCreateResponse{
     bool success = 1;
     string message = 2;
-    NCharacter character = 3;
+    NetActor character = 3;
 }
 
 // 查询角色列表的请求
@@ -134,7 +252,7 @@ message CharacterListRequest{
 }
 // 角色列表的响应
 message CharacterListResponse{
-	repeated NCharacter characterList = 1;
+	repeated NetActor characterList = 1;
 }
 // 删除角色的请求
 message CharacterDeleteRequest{
@@ -145,3 +263,5 @@ message CharacterDeleteResponse{
 	bool success = 1;
 	string message = 2;
 }
+
+

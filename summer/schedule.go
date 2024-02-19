@@ -1,11 +1,12 @@
 package summer
 
 import (
-	"context"
 	"github.com/NumberMan1/common/logger"
+	"github.com/NumberMan1/common/ns"
 	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/timeunit"
 	"reflect"
+	"sync"
 	"time"
 )
 
@@ -64,19 +65,28 @@ func newTask(taskMethod func(), startTime int64, interval int64, repeatCount int
 }
 
 type Schedule struct {
-	tasks   []*task
-	isStart bool
-	stop    context.CancelFunc
-	fps     int // 每秒帧数
+	tasks       []*task
+	addQueue    *ns.TSQueue[*task]
+	removeQueue *ns.TSQueue[func()]
+	isStart     bool
+	stop        chan struct{}
+	fps         int // 每秒帧数
+	ticker      *time.Ticker
+	next        int64 //下一帧执行的时间
+	mutex       sync.Mutex
 }
 
 func GetScheduleInstance() *Schedule {
 	result, _ := singleton.GetOrDo[*Schedule](&singleSchedule, func() (*Schedule, error) {
 		return &Schedule{
-			tasks:   make([]*task, 0),
-			isStart: false,
-			stop:    nil,
-			fps:     100,
+			tasks:       make([]*task, 0),
+			addQueue:    ns.NewTSQueue[*task](),
+			removeQueue: ns.NewTSQueue[func()](),
+			isStart:     false,
+			stop:        make(chan struct{}, 1),
+			fps:         50,
+			ticker:      nil,
+			mutex:       sync.Mutex{},
 		}, nil
 	})
 	return result
@@ -84,22 +94,21 @@ func GetScheduleInstance() *Schedule {
 
 func (s *Schedule) Start() *Schedule {
 	if !s.isStart {
-		ctx, cancel := context.WithCancel(context.TODO())
-		s.stop = cancel
 		s.isStart = true
-		go s.run(ctx)
+		s.ticker = time.NewTicker(1 * time.Millisecond)
+		go s.execute()
 	}
 	return s
 }
 
 func (s *Schedule) Stop() *Schedule {
-	s.stop()
-	s.isStart = false
+	if s.isStart {
+		s.ticker.Stop()
+		s.ticker = nil
+		s.isStart = false
+		s.stop <- struct{}{}
+	}
 	return s
-}
-
-func (s *Schedule) run(ctx context.Context) {
-	s.runLoop(ctx)
 }
 
 func (s *Schedule) AddTask(action func(), timeUnit timeunit.TimeUnit, timeValue, repeatCount int) {
@@ -110,47 +119,61 @@ func (s *Schedule) AddTask(action func(), timeUnit timeunit.TimeUnit, timeValue,
 	}
 	startTime := time.Now().UnixMilli()
 	t := newTask(action, startTime, interval, repeatCount)
-	s.tasks = append(s.tasks, t)
+	s.addQueue.Push(t)
 }
 
 func (s *Schedule) RemoveTask(action func()) {
-	for i, t := range s.tasks {
-		if reflect.ValueOf(t.TaskMethod) == reflect.ValueOf(action) {
-			s.tasks = append(s.tasks[:i], s.tasks[i+1:]...)
-			break
-		}
-	}
+	s.removeQueue.Push(action)
 }
 
-// runLoop 计时器主循环
-func (s *Schedule) runLoop(ctx context.Context) {
-	// tick间隔
-	interval := 1000 / s.fps
+// Update 每帧都会执行
+func (s *Schedule) Update(action func()) {
+	t := newTask(action, 0, 0, 0)
+	s.addQueue.Push(t)
+}
+
+func (s *Schedule) execute() {
 	for {
 		select {
-		case <-ctx.Done():
-			return
-		default:
-			timeunit.Tick()
+		case <-s.ticker.C:
+			// tick间隔
+			interval := 1000 / s.fps
 			startTime := time.Now().UnixMilli()
-			// 把完毕的任务移除
-			for i, t := range s.tasks {
-				if t.Completed {
-					s.tasks = append(s.tasks[:i], s.tasks[i+1:]...)
+			if startTime < s.next {
+				return
+			}
+			s.next = startTime + int64(interval)
+			timeunit.Tick()
+			s.mutex.Lock()
+			//移除队列
+			for item := s.removeQueue.Pop(); item != nil; item = s.removeQueue.Pop() {
+				for i, task := range s.tasks {
+					if reflect.ValueOf(task.TaskMethod) == reflect.ValueOf(item) {
+						s.tasks = append(s.tasks[:i], s.tasks[i+1:]...)
+						break
+					}
 				}
+			}
+			// 移除完毕的任务
+			for i, task := range s.tasks {
+				if task.Completed {
+					s.tasks = append(s.tasks[:i], s.tasks[i+1:]...)
+					break
+				}
+			}
+			// 添加队列任务
+			for item := s.addQueue.Pop(); item != nil; item = s.addQueue.Pop() {
+				s.tasks = append(s.tasks, item)
 			}
 			// 执行任务
-			for _, t := range s.tasks {
-				if t.ShouldRun() {
-					t.Run()
+			for _, task := range s.tasks {
+				if task.ShouldRun() {
+					task.Run()
 				}
 			}
-			endTime := time.Now().UnixMilli()
-			msTime := int64(interval) - (endTime - startTime)
-			if msTime > 0 {
-				// Sleep for millisecond
-				time.Sleep(time.Millisecond * time.Duration(msTime))
-			}
+			s.mutex.Unlock()
+		case <-s.stop:
+			return
 		}
 	}
 }
