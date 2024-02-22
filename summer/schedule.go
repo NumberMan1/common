@@ -95,7 +95,7 @@ func GetScheduleInstance() *Schedule {
 func (s *Schedule) Start() *Schedule {
 	if !s.isStart {
 		s.isStart = true
-		s.ticker = time.NewTicker(100 * time.Millisecond)
+		s.ticker = time.NewTicker(50 * time.Millisecond)
 		go s.execute()
 	}
 	return s
