@@ -13,6 +13,8 @@ enum EntityType
 	Character = 0;
 	Monster = 1;
 	NPC = 2;
+	Item = 3;
+	Gate = 4;
 }
 
 // 用于网络传输的三维向量
@@ -46,43 +48,54 @@ message NetEntity {
 }
 // 角色信息
 message NetActor{
-    int32 id = 1;
-    int32 tid = 2; //单位类型=职业=TID
-    string name = 4;
-    int32 level = 5;
-    int64 exp = 6;
-    int32 spaceId = 7;
-    int64 gold = 8;
-    NetEntity entity = 9;
+	int32 id = 1;
+	int32 tid = 2; //单位类型=职业=TID
+	string name = 4;
+	int32 level = 5;
+	int64 exp = 6;
+	int32 spaceId = 7;
+	int64 gold = 8;
+	NetEntity entity = 9;
 	float hp = 10;
 	float mp = 11;
 	EntityType type = 12;
 	repeated SkillInfo Skills = 13;
+	//InventoryInfo knapsackInfo = 14; 	//背包
+	//InventoryInfo warehouseInfo = 15; 	//仓库
+	InventoryInfo equipsInfo = 16; 		//穿戴装备
+	ItemInfo itemInfo = 17;		//物品实体专用属性
+	float hpmax = 18;	//生命上限
+	float mpmax = 19;	//法力上限
 }
 
 
 message PropertyUpdate {
-	enum Prop {
-	  HP = 0;
-	  MP = 1;
-	  HPMax = 2;
-	  MPMax = 3;
-	  State = 4;
-	  Level = 5;
-	  Name = 6;
+	enum Property {
+		HP = 0;			//生命
+		MP = 1;			//法力
+		HPMax = 2;		//生命上限
+		MPMax = 3;		//法力上限
+		State = 4;		//状态
+		Level = 5;		//等级
+		Name = 6;		//名字
+		Golds = 7;		//金币
+		Exp = 8;		//经验
+		Energy = 9;		//活力
+		//幸运、罪恶、钻石、碎片
 	}
-  
+
 	message PropertyValue {
-	  oneof value {
-		int32 int_value = 1;
-		float float_value = 2;
-		string string_value = 3;
-		UnitState state_value = 4;
-	  }
+		oneof value {
+			int32 int_value = 1;
+			float float_value = 2;
+			string string_value = 3;
+			UnitState state_value = 4;
+			int64 long_value = 5;
+		}
 	}
-  
+
 	int32 entity_id = 1;
-	Prop property = 2;
+	Property property = 2;
 	PropertyValue oldValue = 3;
 	PropertyValue newValue = 4;
 }
@@ -171,7 +184,7 @@ message ReviveRequest{
 //角色进入场景
 message SpaceEnterResponse{
 	NetActor character = 1;
-	repeated NetActor list = 2; 
+	repeated NetActor list = 2;
 }
 
 
@@ -242,9 +255,9 @@ message CharacterCreateRequest{
 
 // 创建角色的响应
 message ChracterCreateResponse{
-    bool success = 1;
-    string message = 2;
-    NetActor character = 3;
+	bool success = 1;
+	string message = 2;
+	NetActor character = 3;
 }
 
 // 查询角色列表的请求
@@ -265,3 +278,59 @@ message CharacterDeleteResponse{
 }
 
 
+// 物品信息
+message ItemInfo{
+	int32 itemId = 1;		//物品ID
+	int32 amount = 2;		//物品数量
+	int32 position = 3;		//所处位置
+}
+// 物品更新
+message ItemUpdate{
+	enum UpdateType {
+		ADD = 0;
+		DELETE = 1;
+		UPDATE = 2;
+	}
+	UpdateType type = 1;
+	ItemInfo item = 2;
+}
+//库存对象
+message InventoryInfo{
+	int32 capacity = 1;	//格子数量
+	repeated ItemInfo list = 2;
+}
+//拾取物品的请求
+message PickupItemRequest{
+	int32 entityId = 1; //物品实体的entityId
+}
+//查询背包信息
+message InventoryRequest{
+	int32 entityId = 1;
+	bool queryKnapsack = 2;		//是否查询背包
+	bool queryWarehouse = 3;	//是否查询仓库
+	bool queryEquipment = 4;	//是否查询装备栏
+}
+//角色的背包信息
+message InventoryResponse{
+	int32 entityId = 1;
+	InventoryInfo knapsackInfo = 2;
+	InventoryInfo warehouseInfo = 3;
+	InventoryInfo equipmentInfo = 4;
+}
+//物品放置请求
+message ItemPlacementRequest {
+	int32 entityId = 1;
+	int32 originIndex = 2;	//原始索引
+	int32 targetIndex = 3;	//目标索引
+}
+//丢弃的物品的请求
+message ItemDiscardRequest{
+	int32 entityId = 1;
+	int32 slotIndex = 2;	//插槽索引
+	int32 count = 3;		//丢弃数量
+}
+//使用物品的请求
+message ItemUseRequest{
+	int32 entityId = 1;		//使用物品的人
+	int32 slotIndex = 2;	//使用哪个插槽的物品
+}

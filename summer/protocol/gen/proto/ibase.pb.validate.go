@@ -35,44 +35,46 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on Package with the rules defined in the
+// Validate checks the field values on Vector3 with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *Package) Validate() error {
+func (m *Vector3) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Package with the rules defined in the
+// ValidateAll checks the field values on Vector3 with the rules defined in the
 // proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in PackageMultiError, or nil if none found.
-func (m *Package) ValidateAll() error {
+// a list of violation errors wrapped in Vector3MultiError, or nil if none found.
+func (m *Vector3) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *Package) validate(all bool) error {
+func (m *Vector3) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for Fullname
+	// no validation rules for X
 
-	// no validation rules for Data
+	// no validation rules for Y
+
+	// no validation rules for Z
 
 	if len(errors) > 0 {
-		return PackageMultiError(errors)
+		return Vector3MultiError(errors)
 	}
 
 	return nil
 }
 
-// PackageMultiError is an error wrapping multiple validation errors returned
-// by Package.ValidateAll() if the designated constraints aren't met.
-type PackageMultiError []error
+// Vector3MultiError is an error wrapping multiple validation errors returned
+// by Vector3.ValidateAll() if the designated constraints aren't met.
+type Vector3MultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m PackageMultiError) Error() string {
+func (m Vector3MultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -81,11 +83,11 @@ func (m PackageMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m PackageMultiError) AllErrors() []error { return m }
+func (m Vector3MultiError) AllErrors() []error { return m }
 
-// PackageValidationError is the validation error returned by Package.Validate
+// Vector3ValidationError is the validation error returned by Vector3.Validate
 // if the designated constraints aren't met.
-type PackageValidationError struct {
+type Vector3ValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -93,22 +95,22 @@ type PackageValidationError struct {
 }
 
 // Field function returns field value.
-func (e PackageValidationError) Field() string { return e.field }
+func (e Vector3ValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e PackageValidationError) Reason() string { return e.reason }
+func (e Vector3ValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e PackageValidationError) Cause() error { return e.cause }
+func (e Vector3ValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e PackageValidationError) Key() bool { return e.key }
+func (e Vector3ValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e PackageValidationError) ErrorName() string { return "PackageValidationError" }
+func (e Vector3ValidationError) ErrorName() string { return "Vector3ValidationError" }
 
 // Error satisfies the builtin error interface
-func (e PackageValidationError) Error() string {
+func (e Vector3ValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -120,14 +122,14 @@ func (e PackageValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sPackage.%s: %s%s",
+		"invalid %sVector3.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = PackageValidationError{}
+var _ error = Vector3ValidationError{}
 
 var _ interface {
 	Field() string
@@ -135,4 +137,276 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = PackageValidationError{}
+} = Vector3ValidationError{}
+
+// Validate checks the field values on Rpc with the rules defined in the proto
+// definition for this message. If any rules are violated, the first error
+// encountered is returned, or nil if there are no violations.
+func (m *Rpc) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Rpc with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in RpcMultiError, or nil if none found.
+func (m *Rpc) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Rpc) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for Target
+
+	// no validation rules for Args
+
+	if len(errors) > 0 {
+		return RpcMultiError(errors)
+	}
+
+	return nil
+}
+
+// RpcMultiError is an error wrapping multiple validation errors returned by
+// Rpc.ValidateAll() if the designated constraints aren't met.
+type RpcMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RpcMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RpcMultiError) AllErrors() []error { return m }
+
+// RpcValidationError is the validation error returned by Rpc.Validate if the
+// designated constraints aren't met.
+type RpcValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RpcValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RpcValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RpcValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RpcValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RpcValidationError) ErrorName() string { return "RpcValidationError" }
+
+// Error satisfies the builtin error interface
+func (e RpcValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRpc.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RpcValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RpcValidationError{}
+
+// Validate checks the field values on InstantiateRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *InstantiateRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on InstantiateRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// InstantiateRequestMultiError, or nil if none found.
+func (m *InstantiateRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *InstantiateRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for PrefabName
+
+	if all {
+		switch v := interface{}(m.GetPosition()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, InstantiateRequestValidationError{
+					field:  "Position",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, InstantiateRequestValidationError{
+					field:  "Position",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPosition()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return InstantiateRequestValidationError{
+				field:  "Position",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetDirection()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, InstantiateRequestValidationError{
+					field:  "Direction",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, InstantiateRequestValidationError{
+					field:  "Direction",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetDirection()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return InstantiateRequestValidationError{
+				field:  "Direction",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Group
+
+	// no validation rules for Args
+
+	if len(errors) > 0 {
+		return InstantiateRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// InstantiateRequestMultiError is an error wrapping multiple validation errors
+// returned by InstantiateRequest.ValidateAll() if the designated constraints
+// aren't met.
+type InstantiateRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m InstantiateRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m InstantiateRequestMultiError) AllErrors() []error { return m }
+
+// InstantiateRequestValidationError is the validation error returned by
+// InstantiateRequest.Validate if the designated constraints aren't met.
+type InstantiateRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e InstantiateRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e InstantiateRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e InstantiateRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e InstantiateRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e InstantiateRequestValidationError) ErrorName() string {
+	return "InstantiateRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e InstantiateRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sInstantiateRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = InstantiateRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = InstantiateRequestValidationError{}
