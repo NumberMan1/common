@@ -6,7 +6,6 @@ import (
 	"github.com/NumberMan1/common/ns"
 	"github.com/NumberMan1/common/summer/core"
 	"github.com/NumberMan1/common/summer/proto_helper"
-	pt "github.com/NumberMan1/common/summer/protocol/gen/proto"
 	"google.golang.org/protobuf/proto"
 	"net"
 	"reflect"
@@ -53,7 +52,6 @@ type connection struct {
 	dataReceivedCallback ns.Event[ConnectionDataReceivedCallback]
 	// 连接断开
 	disconnectedCallback ns.Event[ConnectionDisconnectedCallback]
-	_package             *pt.Package
 	mutex                sync.Mutex
 }
 
