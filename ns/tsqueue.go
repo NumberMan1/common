@@ -31,6 +31,8 @@ func NewTSQueue[T any]() (q *TSQueue[T]) {
 }
 
 func (q *TSQueue[T]) Size() (num uint64) {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
 	return q.end - q.begin
 }
 
