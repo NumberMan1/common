@@ -1,11 +1,13 @@
 package core
 
 import (
+	"net"
+	"sync/atomic"
+
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
 	"github.com/NumberMan1/common/summer/network"
 	"google.golang.org/protobuf/proto"
-	"net"
 )
 
 type TcpServerEventHandler struct {
@@ -50,7 +52,7 @@ type TcpServer struct {
 	//可以排队接受的传入连接数
 	maxBacklog int
 	//当前的传入连接数
-	curBacklog  int
+	curBacklog  atomic.Int32
 	acceptEvent *ns.AutoResetEvent
 	chStop      chan struct{} // 用于发送停止信号
 }
@@ -84,7 +86,7 @@ func NewTcpServer(address string) (*TcpServer, error) {
 		dataReceived:    ns.Event[TcpServerDataReceivedCallback]{},
 		disconnected:    ns.Event[TcpServerDisconnectedCallback]{},
 		maxBacklog:      100,
-		curBacklog:      0,
+		curBacklog:      atomic.Int32{},
 		acceptEvent:     ns.NewAutoResetEvent(),
 		chStop:          make(chan struct{}, 1),
 	}, nil
@@ -123,12 +125,12 @@ func (ts *TcpServer) onAccept(socket *net.TCPConn, err error) {
 		default:
 			if err == nil {
 				if socket != nil {
-					ts.curBacklog += 1
+					ts.curBacklog.Add(1)
 					ts.OnSocketConnected(socket)
 					ts.socketConnected.Invoke(ts, socket)
 				}
 			}
-			if ts.curBacklog > ts.maxBacklog {
+			if int(ts.curBacklog.Load()) > ts.maxBacklog {
 				ts.acceptEvent.Wait()
 			}
 			socket, err = ts.serverListener.AcceptTCP()
@@ -147,8 +149,8 @@ func (ts *TcpServer) OnSocketConnected(socket *net.TCPConn) {
 		}
 	}}
 	disconnectedCallback := TcpServerDisconnectedCallback{Op: func(sender network.Connection) {
-		ts.curBacklog -= 1
-		if ts.curBacklog > ts.maxBacklog { // 如果数量超过则代表正在等待唤醒
+		ts.curBacklog.Add(-1)
+		if int(ts.curBacklog.Load()) > ts.maxBacklog { // 如果数量超过则代表正在等待唤醒
 			ts.acceptEvent.Set()
 		}
 		if ts.disconnected.HasDelegate() {

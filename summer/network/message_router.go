@@ -1,14 +1,15 @@
 package network
 
 import (
-	"github.com/NumberMan1/common/logger"
-	"github.com/NumberMan1/common/ns"
-	"github.com/NumberMan1/common/ns/singleton"
-	"google.golang.org/protobuf/proto"
 	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/NumberMan1/common/logger"
+	"github.com/NumberMan1/common/ns"
+	"github.com/NumberMan1/common/ns/singleton"
+	"google.golang.org/protobuf/proto"
 )
 
 type Msg struct {
@@ -28,7 +29,7 @@ func (m MessageHandler) Operator(args ...any) {
 // 都应通过GetMessageRouterInstance来获取对象
 type MessageRouter struct {
 	threadCount int                //工作协程数
-	workerCount int                //正在工作的协程数
+	workerCount atomic.Int32       //正在工作的协程数
 	Running     bool               //是否正在运行状态
 	threadEvent *ns.AutoResetEvent //通过Set每次可以唤醒1个线程
 	con         sync.Cond
@@ -48,7 +49,7 @@ func GetMessageRouterInstance() *MessageRouter {
 	instance, _ := singleton.GetOrDo[*MessageRouter](&singleMessageRouter, func() (*MessageRouter, error) {
 		return &MessageRouter{
 			threadCount:  1,
-			workerCount:  0,
+			workerCount:  atomic.Int32{},
 			Running:      false,
 			threadEvent:  ns.NewAutoResetEvent(),
 			messageQueue: ns.NewTSQueue[Msg](),
@@ -112,13 +113,13 @@ func (mr *MessageRouter) Start(threadCount int) {
 	mr.Running = true
 	mr.threadCount = min(max(threadCount, 1), 200)
 	for i := 0; i < mr.threadCount; i += 1 {
+		mr.waitGroup.Add(i)
 		go func(i int) {
-			mr.waitGroup.Add(i)
 			mr.messageWork()
 			mr.waitGroup.Done()
 		}(i)
 	}
-	for mr.workerCount < mr.threadCount {
+	for int(mr.workerCount.Load()) < mr.threadCount {
 		time.Sleep(100 * time.Millisecond)
 	}
 }
@@ -126,7 +127,7 @@ func (mr *MessageRouter) Start(threadCount int) {
 func (mr *MessageRouter) Stop() {
 	mr.Running = false
 	mr.messageQueue.Clear()
-	for mr.workerCount > 0 {
+	for mr.workerCount.Load() > 0 {
 		mr.threadEvent.Set()
 	}
 	mr.waitGroup.Wait()
@@ -139,13 +140,9 @@ func (mr *MessageRouter) messageWork() {
 		if err := recover(); err != nil {
 			logger.SLCError("MessageRouter messageWork error %v", err)
 		}
-		a := atomic.Int32{}
-		a.Store(int32(mr.workerCount))
-		mr.workerCount = int(a.Add(-1))
+		mr.workerCount.Add(-1)
 	}()
-	a := atomic.Int32{}
-	a.Store(int32(mr.workerCount))
-	mr.workerCount = int(a.Add(1))
+	mr.workerCount.Add(1)
 	for mr.Running {
 		if mr.messageQueue.Empty() {
 			mr.threadEvent.Wait() //可以通过Set()唤醒

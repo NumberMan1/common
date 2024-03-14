@@ -136,6 +136,9 @@ func (c *connection) SocketSend(data []byte, offset, count int) {
 					break
 				}
 			}
+			if err != nil {
+				logger.SLCError("NetConnection Send ERROR: %s", err.Error())
+			}
 			//c.sendCallBack()
 		}
 		c.mutex.Unlock()
