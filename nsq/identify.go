@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"encoding/json"
-	"github.com/pkg/errors"
+	"errors"
 	"io"
 	"os"
 	"time"
@@ -50,17 +50,17 @@ func (c Identify) Write(w *bufio.Writer) (err error) {
 	}
 
 	if _, err = w.WriteString("IDENTIFY\n"); err != nil {
-		err = errors.Wrap(err, "writing IDENTIFY command")
+		err = errors.Join(err, errors.New("writing IDENTIFY command"))
 		return
 	}
 
 	if err = binary.Write(w, binary.BigEndian, uint32(len(data))); err != nil {
-		err = errors.Wrap(err, "writing IDENTIFY body size")
+		err = errors.Join(err, errors.New("writing IDENTIFY body size"))
 		return
 	}
 
 	if _, err = w.Write(data); err != nil {
-		err = errors.Wrap(err, "writing IDENTIFY body data")
+		err = errors.Join(err, errors.New("writing IDENTIFY body data"))
 		return
 	}
 
@@ -88,19 +88,19 @@ func readIdentifyBody(r *bufio.Reader) (body Identify, err error) {
 	var data []byte
 
 	if err = binary.Read(r, binary.BigEndian, &size); err != nil {
-		err = errors.Wrap(err, "reading IDENTIFY body size")
+		err = errors.Join(err, errors.New("reading IDENTIFY body size"))
 		return
 	}
 
 	data = make([]byte, int(size))
 
 	if _, err = io.ReadFull(r, data); err != nil {
-		err = errors.Wrap(err, "reading IDENTIFY body data")
+		err = errors.Join(err, errors.New("reading IDENTIFY body data"))
 		return
 	}
 
 	if err = json.Unmarshal(data, &body); err != nil {
-		err = errors.Wrap(err, "decoding IDENTIFY body")
+		err = errors.Join(err, errors.New("decoding IDENTIFY body"))
 		return
 	}
 

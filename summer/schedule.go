@@ -140,7 +140,7 @@ func (s *Schedule) execute() {
 			interval := 1000 / s.fps
 			startTime := time.Now().UnixMilli()
 			if startTime < s.next {
-				return
+				continue
 			}
 			s.next = startTime + int64(interval)
 			timeunit.Tick()

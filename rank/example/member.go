@@ -1,8 +1,8 @@
 package example
 
-import "golang.org/x/exp/constraints"
+import "cmp"
 
-type Member[T, U constraints.Ordered] struct {
+type Member[T, U cmp.Ordered] struct {
 	UId   U
 	Score T
 	Extra any

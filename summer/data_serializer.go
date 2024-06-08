@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
-	"golang.org/x/exp/slices"
 	"io"
 	"reflect"
+	"slices"
 )
 
 // Serialize 接受uint8,uint16,uint32,uint,uint64

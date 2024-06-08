@@ -2,9 +2,9 @@ package nsq
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/nsqio/go-nsq"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"math/rand"
 	"net/http"

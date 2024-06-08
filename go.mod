@@ -5,12 +5,10 @@ go 1.21.1
 require (
 	github.com/json-iterator/go v1.1.12
 	github.com/nsqio/go-nsq v1.1.0
-	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/redis/go-redis/v9 v9.3.0
 	go.mongodb.org/mongo-driver v1.13.0
 	go.uber.org/zap v1.26.0
-	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/sync v0.3.0
 	google.golang.org/protobuf v1.31.0
 	gorm.io/driver/clickhouse v0.6.0
