@@ -17,7 +17,7 @@ var (
 	dict2    = make(map[reflect.Type]int)
 )
 
-func init() {
+func Init() {
 	ts := protoregistry.GlobalTypes
 	ts.RangeMessages(func(messageType protoreflect.MessageType) bool {
 		name := messageType.Descriptor().FullName()

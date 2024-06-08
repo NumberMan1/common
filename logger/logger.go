@@ -2,13 +2,17 @@ package logger
 
 import (
 	"fmt"
+	"github.com/NumberMan1/common/global/variable"
+	zaprotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
+	"path"
 	"time"
 )
 
 var SLoggerConsole *zap.SugaredLogger
+var level zapcore.Level
 
 func init() {
 	SLoggerConsole = LogInit(false, zap.DebugLevel, "")
@@ -91,62 +95,107 @@ func LogInit(isJson bool, level zapcore.Level, filePath string) *zap.SugaredLogg
 	return l.Sugar()
 }
 
-//type Logger struct {
-//	sugarLogger *zap.SugaredLogger
-//	logger      *zap.Logger
-//	path        string
-//}
-//
-//func (s *Logger) SugarLogger() *zap.SugaredLogger {
-//	return s.sugarLogger
-//}
-//
-//func (s *Logger) Logger() *zap.Logger {
-//	return s.logger
-//}
-//
-//func (s *Logger) Path() string {
-//	return s.path
-//}
-//
-//func (s *Logger) SetPath(path string) {
-//	s.path = path
-//}
-//
-//func NewLogger(path string) *Logger {
-//	if len(path) == 0 {
-//		return nil
-//	}
-//	s := &Logger{path: path}
-//	s.init()
-//	return s
-//}
-//
-//func (s *Logger) init() {
-//	writeSyncer := s.getLogWriter()
-//	encoder := getEncoder()
-//	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
-//	logger := zap.New(core)
-//	s.sugarLogger = logger.Sugar()
-//	s.logger = logger
-//	zap.ReplaceGlobals(logger)
-//}
-//
-//func getEncoder() zapcore.Encoder {
-//	encoderConfig := zap.NewProductionEncoderConfig()
-//	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-//	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
-//	return zapcore.NewConsoleEncoder(encoderConfig)
-//}
-//
-//func (s *Logger) getLogWriter() zapcore.WriteSyncer {
-//	file, _ := os.OpenFile(s.path+timeunit.Now().Format("2006-01-02")+".log", os.O_APPEND|os.O_WRONLY, 0644)
-//	return zapcore.AddSync(file)
-//}
-//func (s *Logger) SugarError(format string, a ...any) {
-//	s.sugarLogger.Errorf(format, a)
-//}
-//
-//func (s *Logger) SugarInfo(format string, a ...any) {
-//	s.sugarLogger.Infof(format, a)
-//}
+func Zap() (logger *zap.Logger) {
+	if ok, _ := PathExists(variable.Config.Zap.Director); !ok { // 判断是否有Director文件夹
+		fmt.Printf("create %v directory\n", variable.Config.Zap.Director)
+		_ = os.Mkdir(variable.Config.Zap.Director, os.ModePerm)
+	}
+
+	switch variable.Config.Zap.LogLevel { // 初始化配置文件的Level
+	case "debug":
+		level = zap.DebugLevel
+	case "info":
+		level = zap.InfoLevel
+	case "warn":
+		level = zap.WarnLevel
+	case "error":
+		level = zap.ErrorLevel
+	case "dpanic":
+		level = zap.DPanicLevel
+	case "panic":
+		level = zap.PanicLevel
+	case "fatal":
+		level = zap.FatalLevel
+	default:
+		level = zap.InfoLevel
+	}
+
+	if level == zap.DebugLevel || level == zap.ErrorLevel {
+		logger = zap.New(getEncoderCore(), zap.AddStacktrace(level))
+	} else {
+		logger = zap.New(getEncoderCore())
+	}
+	logger = logger.WithOptions(zap.AddCaller())
+	return logger
+}
+
+// getEncoderConfig 获取zapcore.EncoderConfig
+func getEncoderConfig() (config zapcore.EncoderConfig) {
+	config = zapcore.EncoderConfig{
+		MessageKey:     "protocol",
+		LevelKey:       "level",
+		TimeKey:        "time",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     CustomTimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.FullCallerEncoder,
+	}
+	switch {
+	case variable.Config.Zap.EncodeLevel == "LowercaseLevelEncoder": // 小写编码器(默认)
+		config.EncodeLevel = zapcore.LowercaseLevelEncoder
+	case variable.Config.Zap.EncodeLevel == "LowercaseColorLevelEncoder": // 小写编码器带颜色
+		config.EncodeLevel = zapcore.LowercaseColorLevelEncoder
+	case variable.Config.Zap.EncodeLevel == "CapitalLevelEncoder": // 大写编码器
+		config.EncodeLevel = zapcore.CapitalLevelEncoder
+	case variable.Config.Zap.EncodeLevel == "CapitalColorLevelEncoder": // 大写编码器带颜色
+		config.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	default:
+		config.EncodeLevel = zapcore.LowercaseLevelEncoder
+	}
+	return config
+}
+
+// getEncoder 获取zapcore.Encoder
+func getEncoder() zapcore.Encoder {
+	return zapcore.NewConsoleEncoder(getEncoderConfig())
+}
+
+// getEncoderCore 获取Encoder的zapcore.Core
+func getEncoderCore() (core zapcore.Core) {
+	writer, err := GetWriteSyncer() // 使用file-rotatelogs进行日志分割
+	if err != nil {
+		fmt.Printf("Get Write Syncer Failed err:%v", err.Error())
+		return
+	}
+	return zapcore.NewCore(getEncoder(), writer, level)
+}
+
+// 自定义日志输出时间格式
+func CustomTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(t.Format(variable.Config.Zap.LogPrefix + "2006-01-02 15:04:05.000"))
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func GetWriteSyncer() (zapcore.WriteSyncer, error) {
+	fileWriter, err := zaprotatelogs.New(
+		path.Join(variable.Config.Zap.Director, "%Y-%m-%d.log"),
+		zaprotatelogs.WithMaxAge(7*24*time.Hour),
+		zaprotatelogs.WithRotationTime(24*time.Hour),
+	)
+	return zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(fileWriter)), err
+
+}

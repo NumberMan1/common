@@ -1,0 +1,18 @@
+{
+    "mysql": {
+        "host": "localhost",
+        "port": 3306,
+        "user": "root",
+        "password": "root",
+        "database": "xm_game",
+        "db_config": "charset=utf8mb4&parseTime=True&loc=Local",
+        "table_prefix": "g_"
+    },
+    "zap": {
+        "director": "storage/logs",
+        "log_level": "info",
+        "encode_level": "LowercaseColorLevelEncoder",
+        "log_prefix": ""
+    },
+    "buffer_size": 6000
+}
