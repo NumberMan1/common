@@ -91,7 +91,7 @@ func LogInit(isJson bool, level zapcore.Level, filePath string) *zap.SugaredLogg
 			zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level),
 		)
 	}
-	l := zap.New(core)
+	l := zap.New(core, zap.AddStacktrace(level))
 	return l.Sugar()
 }
 
