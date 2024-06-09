@@ -5,6 +5,7 @@ import (
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
 	"github.com/NumberMan1/common/summer/core"
+	"github.com/NumberMan1/common/summer/network/message_router"
 	"github.com/NumberMan1/common/summer/proto_helper"
 	"google.golang.org/protobuf/proto"
 	"net"
@@ -91,8 +92,8 @@ func NewConnection(socket net.Conn) Connection {
 func (c *connection) _received(data []byte) error {
 	code := binary.BigEndian.Uint16(data)
 	msg, err := proto_helper.ParseFrom(int(code), data, 2, len(data)-2)
-	if GetMessageRouterInstance().Running {
-		GetMessageRouterInstance().AddMessage(Msg{
+	if message_router.GetMessageRouterInstance().Running {
+		message_router.GetMessageRouterInstance().AddMessage(message_router.Msg{
 			Sender:  c,
 			Message: msg,
 		})

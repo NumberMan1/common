@@ -1,19 +1,22 @@
-package network
+package message_router
 
 import (
+	"fmt"
+	"github.com/NumberMan1/common/ns/singleton"
+	"github.com/NumberMan1/common/summer/network"
 	"reflect"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
-	"github.com/NumberMan1/common/ns/singleton"
 	"google.golang.org/protobuf/proto"
 )
 
 type Msg struct {
-	Sender  Connection
+	Sender  network.Connection
 	Message proto.Message
 }
 
@@ -25,9 +28,8 @@ func (m MessageHandler) Operator(args ...any) {
 	m.Op(args[0].(Msg))
 }
 
-// MessageRouter 消息分发器
-// 都应通过GetMessageRouterInstance来获取对象
-type MessageRouter struct {
+// NameRouter 消息分发器,通过string注册
+type NameRouter struct {
 	threadCount int                //工作协程数
 	workerCount atomic.Int32       //正在工作的协程数
 	Running     bool               //是否正在运行状态
@@ -41,28 +43,32 @@ type MessageRouter struct {
 	mutex       sync.Mutex
 }
 
+func NewNameRouter() *NameRouter {
+	return &NameRouter{
+		threadCount:  1,
+		workerCount:  atomic.Int32{},
+		Running:      false,
+		threadEvent:  ns.NewAutoResetEvent(),
+		messageQueue: ns.NewTSQueue[Msg](),
+		delegateMap:  map[string]ns.Event[MessageHandler]{},
+		waitGroup:    sync.WaitGroup{},
+		mutex:        sync.Mutex{},
+	}
+}
+
 var (
 	singleMessageRouter = singleton.Singleton{}
 )
 
-func GetMessageRouterInstance() *MessageRouter {
-	instance, _ := singleton.GetOrDo[*MessageRouter](&singleMessageRouter, func() (*MessageRouter, error) {
-		return &MessageRouter{
-			threadCount:  1,
-			workerCount:  atomic.Int32{},
-			Running:      false,
-			threadEvent:  ns.NewAutoResetEvent(),
-			messageQueue: ns.NewTSQueue[Msg](),
-			delegateMap:  map[string]ns.Event[MessageHandler]{},
-			waitGroup:    sync.WaitGroup{},
-			mutex:        sync.Mutex{},
-		}, nil
+func GetMessageRouterInstance() *NameRouter {
+	instance, _ := singleton.GetOrDo[*NameRouter](&singleMessageRouter, func() (*NameRouter, error) {
+		return NewNameRouter(), nil
 	})
 	return instance
 }
 
 // Subscribe 订阅
-func (mr *MessageRouter) Subscribe(name string, handler MessageHandler) {
+func (mr *NameRouter) Subscribe(name string, handler MessageHandler) {
 	_, ok := mr.delegateMap[name]
 	if !ok {
 		mr.delegateMap[name] = ns.Event[MessageHandler]{}
@@ -70,28 +76,30 @@ func (mr *MessageRouter) Subscribe(name string, handler MessageHandler) {
 	d := mr.delegateMap[name]
 	d.AddDelegate(ns.NewDelegate(handler, reflect.ValueOf(handler.Op).String()))
 	mr.delegateMap[name] = d
-	logger.SLCDebug("Subscribe:%v", name)
+	fmt.Println("Subscribe:", name)
 }
 
 // Off 退订
-func (mr *MessageRouter) Off(name string, handler MessageHandler) {
+func (mr *NameRouter) Off(name string, handler MessageHandler) {
 	_, ok := mr.delegateMap[name]
 	if !ok {
 		mr.delegateMap[name] = ns.Event[MessageHandler]{}
 	}
 	d := mr.delegateMap[name]
 	d.RemoveDelegates(reflect.ValueOf(handler.Op).String())
-	logger.SLCDebug("Off:%v", name)
+	fmt.Println("Off:", name)
 }
 
 // fire 触发
-func (mr *MessageRouter) fire(msg Msg) {
+func (mr *NameRouter) fire(msg Msg) {
 	name := string(msg.Message.ProtoReflect().Descriptor().FullName())
 	d, ok := mr.delegateMap[name]
 	if ok {
 		defer func() {
 			if err := recover(); err != nil {
-				logger.SLCError("MessageRouter fire error %v", err)
+				buf := make([]byte, 1024)
+				n := runtime.Stack(buf, false)
+				fmt.Printf("NameRouter fire error: %v\nStack trace:\n%s\n", err, buf[:n])
 			}
 		}()
 		if d.HasDelegate() {
@@ -101,12 +109,12 @@ func (mr *MessageRouter) fire(msg Msg) {
 }
 
 // AddMessage 添加新的消息到队列中
-func (mr *MessageRouter) AddMessage(msg Msg) {
+func (mr *NameRouter) AddMessage(msg Msg) {
 	mr.messageQueue.Push(msg)
 	mr.threadEvent.Set()
 }
 
-func (mr *MessageRouter) Start(threadCount int) {
+func (mr *NameRouter) Start(threadCount int) {
 	if mr.Running {
 		return
 	}
@@ -124,7 +132,7 @@ func (mr *MessageRouter) Start(threadCount int) {
 	}
 }
 
-func (mr *MessageRouter) Stop() {
+func (mr *NameRouter) Stop() {
 	mr.Running = false
 	mr.messageQueue.Clear()
 	for mr.workerCount.Load() > 0 {
@@ -134,11 +142,13 @@ func (mr *MessageRouter) Stop() {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func (mr *MessageRouter) messageWork() {
-	logger.SLCInfo("worker thread start")
+func (mr *NameRouter) messageWork() {
+	fmt.Println("worker thread start")
 	defer func() {
 		if err := recover(); err != nil {
-			logger.SLCError("MessageRouter messageWork error %v", err)
+			buf := make([]byte, 1024)
+			n := runtime.Stack(buf, false)
+			fmt.Printf("Panic: %v\nStack trace:\n%s\n", err, buf[:n])
 		}
 		mr.workerCount.Add(-1)
 	}()
@@ -163,7 +173,7 @@ func (mr *MessageRouter) messageWork() {
 }
 
 // executeMessage 处理消息
-func (mr *MessageRouter) executeMessage(msg Msg) {
+func (mr *NameRouter) executeMessage(msg Msg) {
 	//触发订阅
 	//fmt.Println(msg)
 	//if mr.msgOKHandler(msg) {
