@@ -5,6 +5,7 @@ import (
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
 	"github.com/NumberMan1/common/summer/core"
+	core2 "github.com/NumberMan1/common/summer/network/core"
 	"github.com/NumberMan1/common/summer/network/message_router"
 	"github.com/NumberMan1/common/summer/proto_helper"
 	"google.golang.org/protobuf/proto"
@@ -78,7 +79,7 @@ func NewConnection(socket net.Conn) Connection {
 		disconnectedCallback: ns.Event[ConnectionDisconnectedCallback]{},
 		mutex:                sync.Mutex{},
 	}
-	lfd := NewSocketReceiver(socket)
+	lfd := core2.NewSocketReceiver(socket)
 	lfd.DataReceived = c._received
 	lfd.Disconnected = func() {
 		if c.disconnectedCallback.HasDelegate() {

@@ -1,4 +1,4 @@
-package core
+package network
 
 import (
 	"net"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ns"
-	"github.com/NumberMan1/common/summer/network"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -19,16 +18,16 @@ func (s TcpServerEventHandler) Operator(args ...any) {
 }
 
 type TcpServerConnectedCallback struct {
-	Op func(connection network.Connection)
+	Op func(connection Connection)
 }
 
 func (c TcpServerConnectedCallback) Operator(args ...any) {
-	c.Op(args[0].(network.Connection))
+	c.Op(args[0].(Connection))
 }
 
-type TcpServerDataReceivedCallback = network.ConnectionDataReceivedCallback
+type TcpServerDataReceivedCallback = ConnectionDataReceivedCallback
 
-type TcpServerDisconnectedCallback = network.ConnectionDisconnectedCallback
+type TcpServerDisconnectedCallback = ConnectionDisconnectedCallback
 
 // TcpServer 负责监听TCP网络端口，异步接收Socket连接
 // 负责监听TCP网络端口，异步接收Socket连接
@@ -142,13 +141,13 @@ func (ts *TcpServer) OnSocketConnected(socket *net.TCPConn) {
 	if ts.socketConnected.HasDelegate() {
 		ts.socketConnected.Invoke(ts, socket)
 	}
-	connection := network.NewConnection(socket)
-	receivedCallback := TcpServerDataReceivedCallback{Op: func(sender network.Connection, data proto.Message) {
+	connection := NewConnection(socket)
+	receivedCallback := TcpServerDataReceivedCallback{Op: func(sender Connection, data proto.Message) {
 		if ts.dataReceived.HasDelegate() {
 			ts.dataReceived.Invoke(sender, data)
 		}
 	}}
-	disconnectedCallback := TcpServerDisconnectedCallback{Op: func(sender network.Connection) {
+	disconnectedCallback := TcpServerDisconnectedCallback{Op: func(sender Connection) {
 		ts.curBacklog.Add(-1)
 		if int(ts.curBacklog.Load()) > ts.maxBacklog { // 如果数量超过则代表正在等待唤醒
 			ts.acceptEvent.Set()

@@ -2,7 +2,6 @@ package message_router
 
 import (
 	"fmt"
-	"github.com/NumberMan1/common/summer/network"
 	"reflect"
 	"runtime"
 	"sync"
@@ -15,7 +14,7 @@ import (
 )
 
 type Msg struct {
-	Sender  network.Connection
+	Sender  any
 	Message proto.Message
 }
 
