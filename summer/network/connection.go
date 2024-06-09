@@ -92,8 +92,8 @@ func NewConnection(socket net.Conn) Connection {
 func (c *connection) _received(data []byte) error {
 	code := binary.BigEndian.Uint16(data)
 	msg, err := proto_helper.ParseFrom(int(code), data, 2, len(data)-2)
-	if message_router.GetMessageRouterInstance().Running {
-		message_router.GetMessageRouterInstance().AddMessage(message_router.Msg{
+	if GetMessageRouterInstance().Running {
+		GetMessageRouterInstance().AddMessage(message_router.Msg{
 			Sender:  c,
 			Message: msg,
 		})

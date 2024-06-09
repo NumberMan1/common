@@ -2,7 +2,6 @@ package message_router
 
 import (
 	"fmt"
-	"github.com/NumberMan1/common/ns/singleton"
 	"github.com/NumberMan1/common/summer/network"
 	"reflect"
 	"runtime"
@@ -54,17 +53,6 @@ func NewNameRouter() *NameRouter {
 		waitGroup:    sync.WaitGroup{},
 		mutex:        sync.Mutex{},
 	}
-}
-
-var (
-	singleMessageRouter = singleton.Singleton{}
-)
-
-func GetMessageRouterInstance() *NameRouter {
-	instance, _ := singleton.GetOrDo[*NameRouter](&singleMessageRouter, func() (*NameRouter, error) {
-		return NewNameRouter(), nil
-	})
-	return instance
 }
 
 // Subscribe 订阅
