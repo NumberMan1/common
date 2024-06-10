@@ -1,17 +1,16 @@
 package global
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/NumberMan1/common/global/variable"
 	"github.com/NumberMan1/common/logger"
 	"github.com/NumberMan1/common/ormdb"
 	"github.com/coocood/freecache"
+	"gopkg.in/yaml.v3"
 	"os"
 )
 
 func InitConf(configPath string) {
-	fmt.Println("加载配置文件dev_config.json")
 	file, _ := os.Open(configPath)
 	defer func(file *os.File) {
 		err := file.Close()
@@ -19,7 +18,7 @@ func InitConf(configPath string) {
 			logger.SLoggerConsole.Error("Error closing")
 		}
 	}(file)
-	decoder := json.NewDecoder(file)
+	decoder := yaml.NewDecoder(file)
 	config := variable.SysConfig{}
 	err := decoder.Decode(&config)
 	if err != nil {

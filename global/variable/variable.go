@@ -8,21 +8,21 @@ import (
 
 type SysConfig struct {
 	Mysql struct {
-		Host        string `json:"host"`
-		Port        int    `json:"port"`
-		User        string `json:"user"`
-		Password    string `json:"password"`
-		Database    string `json:"database"`
-		DbConfig    string `json:"db_config"`
-		TablePrefix string `json:"table_prefix"`
-	} `json:"mysql"`
+		Host        string `yaml:"host"`
+		Port        int    `yaml:"port"`
+		User        string `yaml:"user"`
+		Password    string `yaml:"password"`
+		Database    string `yaml:"database"`
+		DbConfig    string `yaml:"db_config"`
+		TablePrefix string `yaml:"table_prefix"`
+	} `yaml:"mysql"`
 	Zap struct {
-		Director    string `json:"director"`
-		LogLevel    string `json:"log_level"`
-		EncodeLevel string `json:"encode_level"`
-		LogPrefix   string `json:"log_prefix"`
-	} `json:"zap"`
-	BufferSize int `json:"buffer_size"`
+		Director    string `yaml:"director"`
+		LogLevel    string `yaml:"log_level"`
+		EncodeLevel string `yaml:"encode_level"`
+		LogPrefix   string `yaml:"log_prefix"`
+	} `yaml:"zap"`
+	BufferSize int `yaml:"buffer_size"`
 }
 
 //全局变量
