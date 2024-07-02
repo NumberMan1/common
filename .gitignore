@@ -1,0 +1,5 @@
+.idea
+/summer/protocol/csharp_out/
+/summer/protocol/doc/
+/global/test/storage/
+/logger/*.log
