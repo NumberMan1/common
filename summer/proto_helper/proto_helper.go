@@ -3,7 +3,7 @@ package proto_helper
 // ProtobufTool Protobuf序列化与反序列化
 
 import (
-	"github.com/NumberMan1/common/logger"
+	"fmt"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
@@ -38,7 +38,7 @@ func Init() {
 	})
 	for i, fullName := range list {
 		t := registry[fullName]
-		logger.SLCDebug("Proto类型注册：%d - %v", i, fullName)
+		fmt.Printf("Proto类型注册：%d - %v\n", i, fullName)
 		dict1[i] = t
 		dict2[t] = i
 	}
@@ -73,6 +73,6 @@ func ParseFrom(typeCode int, data []byte, offset, len int) (msg proto.Message, e
 	}
 	msg = pbType.New().Interface()
 	err = proto.Unmarshal(data[offset:offset+len], msg)
-	logger.SLCInfo("解析消息：code=%s : %v", seqType.String(), msg)
+	fmt.Printf("解析消息：code=%s : %v\n", seqType.String(), msg)
 	return
 }
