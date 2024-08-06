@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -61,7 +62,7 @@ func (mr *NameRouter) Subscribe(name string, handler MessageHandler) {
 		mr.delegateMap[name] = ns.Event[MessageHandler]{}
 	}
 	d := mr.delegateMap[name]
-	d.AddDelegate(ns.NewDelegate(handler, reflect.ValueOf(handler.Op).String()))
+	d.AddDelegate(ns.NewDelegate(handler, strconv.Itoa(int(reflect.ValueOf(handler.Op).Pointer()))))
 	mr.delegateMap[name] = d
 	fmt.Println("Subscribe:", name)
 }
@@ -73,7 +74,7 @@ func (mr *NameRouter) Off(name string, handler MessageHandler) {
 		mr.delegateMap[name] = ns.Event[MessageHandler]{}
 	}
 	d := mr.delegateMap[name]
-	d.RemoveDelegates(reflect.ValueOf(handler.Op).String())
+	d.RemoveDelegates(strconv.Itoa(int(reflect.ValueOf(handler.Op).Pointer())))
 	fmt.Println("Off:", name)
 }
 
