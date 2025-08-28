@@ -149,6 +149,7 @@ func (mr *NameRouter) messageWork() {
 		//从消息队列取出一个元素
 		mr.mutex.Lock()
 		if mr.messageQueue.Empty() {
+			mr.mutex.Unlock()
 			continue
 		}
 		msg := mr.messageQueue.Pop()
